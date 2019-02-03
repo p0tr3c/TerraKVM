@@ -1,0 +1,13 @@
+awscli
+boto3
+requests
+pywinrm
+ansible
+ansible-modules-hashivault
+boto
+netaddr
+kolla-ansible
+python-openstackclient
+python-glanceclient
+python-neutronclient
+pexpect

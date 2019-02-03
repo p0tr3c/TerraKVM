@@ -1,0 +1,10 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/../defaults/vars.yml"
+  tasks:
+    - name: Destroy terraform deployment
+      terraform:
+        project_path: "{{ terraform_dir }}"
+        state: absent

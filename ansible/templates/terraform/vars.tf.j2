@@ -1,0 +1,16 @@
+variable "network_id" {type = "string", default = ""}
+variable "network_name" {type = "string", default = "default"}
+variable "network_mode" {type = "string", default = "nat"}
+variable "disk_id" {type="string", default = ""}
+variable "vm_name" {type = "string", default = "dev"}
+variable "volume_pool" {type = "string", default = "default"}
+variable "packer_image" {type = "string", default = "../packer/build/dev"}
+variable "network_cidr" {type = "string", default = "172.32.1.0/24"}
+variable "dhcp_enabled" {type = "string", default = "true"}
+variable "ncpu" {type = "string", default = "4"}
+variable "memory" {type = "string", default = "2048"}
+variable "cloudinit_iso" {type = "string", default = "cloudinit.iso"}
+variable "hostname" {type = "string", default = "dev"}
+variable "address" {type = "string", default = "172.32.1.254"}
+variable "ssh_username" {type = "string", default = "dev"}
+variable "ssh_public_key" {type = "string"}

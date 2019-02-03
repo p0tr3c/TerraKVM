@@ -1,0 +1,72 @@
+provider "libvirt" {
+  uri = "qemu:///system"
+}
+
+locals {
+  network_id = "${libvirt_network.dev.id}"
+  disk_id = "${libvirt_volume.dev_root.id}"
+  cloudinit_iso = "${libvirt_cloudinit_disk.dev.id}"
+}
+
+data "template_file" "user_data" {
+  template = <<EOF
+#cloud-config
+users:
+  - name: $${ssh_user}
+    lock-passwd: true
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - $${ssh_public_key}
+EOF
+  vars {
+    ssh_user = "${var.ssh_username}"
+    ssh_public_key = "${var.ssh_public_key}"
+  }
+}
+
+resource "libvirt_cloudinit_disk" "dev" {
+  name       = "${format("%s_%s", var.vm_name, "cloudinit")}"
+  user_data  = "${data.template_file.user_data.rendered}"
+  meta_data  = <<EOF
+    local-hostname: ${var.vm_name}
+EOF
+  pool       = "${var.volume_pool}"
+}
+
+
+resource "libvirt_volume" "dev_root" {
+  name = "${format("%s-%s", var.vm_name, "root")}"
+  pool = "${var.volume_pool}"
+  source = "${var.packer_image}"
+}
+
+resource "libvirt_network" "dev" {
+  name = "${var.network_name}"
+  mode = "${var.network_mode}"
+  addresses = ["${var.network_cidr}"]
+  dhcp {
+    enabled = "${var.dhcp_enabled}"
+  }
+}
+
+resource "libvirt_domain" "dev" {
+  name = "${var.vm_name}"
+  vcpu = "${var.ncpu}"
+  memory = "${var.memory}"
+  cloudinit = "${local.cloudinit_iso}"
+  # Provide hostname, and address via cloudinit, as in generic image
+  network_interface {
+    network_id = "${local.network_id}"
+    wait_for_lease = false
+    hostname = "${var.hostname}"
+    addresses = ["${var.address}"]
+  }
+  disk = [
+    {
+      volume_id = "${local.disk_id}"
+    }
+  ]
+  boot_device {
+    dev = ["hd", "network"]
+  }
+}

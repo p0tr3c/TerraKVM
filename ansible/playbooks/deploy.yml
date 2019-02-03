@@ -1,0 +1,58 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  debugger: on_failed
+  vars_files:
+    - - "{{ playbook_dir }}/../defaults/vars.yml"
+  tasks:
+    - name: Create build cache dir
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0700
+      with_items:
+        - "{{ packer_dir }}/packer_cache"
+      tags:
+        - prep
+        - packer
+    - name: Template packer instructions
+      template:
+        src: "../templates/packer/{{ item.name }}.j2"
+        dest: "{{ packer_dir }}/{{ item.name }}"
+      when: distro in item.distro
+      with_items:
+        - { name: "template.json", distro: ["centos"] }
+        - { name: "kickstart.ks", distro: ["centos"] }
+        - { name: "variables.json", distro: ["centos"] }
+        - { name: "99-cloudinit.cfg", distro: ["centos"] }
+      tags:
+        - template
+        - packer
+    - name: Template terraform instructions
+      template:
+        src: "../templates/terraform/{{ item.name }}.j2"
+        dest: "{{ terraform_dir }}/{{ item.name }}"
+      when: distro in item.distro
+      with_items:
+        - { name: "main.tf", distro: ["centos"] }
+        - { name: "vars.tf", distro: ["centos"] }
+        - { name: "terraform.tfvars", distro: ["centos"] }
+      tags:
+        - template
+        - terraform
+    - name: Execute build
+      command: packer build -var-file=variables.json template.json
+      args:
+        chdir: "{{ packer_dir }}"
+        creates: "{{ packer_dir }}/build/{{ vm_name }}"
+      tags:
+        - build
+        - packer
+    - name: Deploy via terraform
+      terraform:
+        project_path: "{{ terraform_dir }}"
+        state: present
+        force_init: true
+      tags:
+        - deploy
+        - terraform

@@ -1,0 +1,69 @@
+install
+text
+repo --name=os --mirrorlist {{ mirror_address }}?release=$releasever&arch=$basearch&repo=os&infra=$infra
+repo --name=updates --mirrorlist {{ mirror_address }}?release=$releasever&arch=$basearch&repo=updates&infra=$infra
+repo --name=extras --mirrorlist {{ mirror_address }}?release=$releasever&arch=$basearch&repo=extras&infra=$infra
+url --mirrorlist {{ mirror_address }}?release=$releasever&arch=$basearch&repo=os&infra=$infra
+eula --agreed
+
+lang {{ lang }}
+keyboard {{ keyboard }}
+timezone --utc {{ timezone }}
+
+network --onboot yes --device eth0 --bootproto dhcp
+network  --hostname={{ hostname }}
+
+auth --useshadow --enablemd5
+authconfig --enableshadow --passalgo=sha512
+selinux --enforcing
+rootpw --iscrypted {{ rootpw_hash }}
+
+bootloader --location=mbr --driveorder=sda --append="crashkernel=auto rhgb quiet nomodeset"
+
+skipx
+zerombr
+
+clearpart --all --drives=sda
+
+part / --fstype xfs --fsoptions="rw,noatime" --size=1 --grow
+
+%packages --ignoremissing
+@core
+acpid
+at
+bind-utils
+binutils
+curl
+deltarpm
+dstat
+git
+iotop
+ipset
+iptraf-ng
+lsof
+mc
+mtr
+net-tools
+nmap
+pciutils
+policycoreutils
+policycoreutils-python
+redhat-lsb-core
+rsync
+screen
+strace
+tcpdump
+unzip
+uuid
+vim-enhanced
+wget
+nano
+%end
+
+%post
+yum update -y
+yum clean all
+%end
+
+firstboot --disabled
+reboot

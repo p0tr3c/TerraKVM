@@ -1,0 +1,127 @@
+{
+    "variables":
+    {
+        "ncpu": "{{ ncpu | default('2') }}",
+        "memory": "{{ memory | default('2048') }}",
+{% if distro == "centos" %}
+        "kickstart_file": "kickstart.ks",
+        "iso_file": "{{ iso_file | default('CentOS-7-x86_64-NetInstall-1810.iso') }}",
+        "iso_external_path": "{{ iso_external_path | default('http://mirror.mhd.uk.as44574.net/mirror.centos.org/7.6.1810/isos/x86_64/') }}",
+        "iso_internal_path": "{{ iso_internal_path | default('') }}",
+        "iso_checksum": "{{ iso_checksum | default('19d94274ef856c4dfcacb2e7cfe4be73e442a71dd65cc3fb6e46db826040b56e') }}",
+{% elif distro == "ubuntu" %}
+        "preseed_file": "ubuntu.preseed",
+        "iso_file": "",
+        "iso_external_path": "",
+        "iso_internal_path": "",
+        "iso_checksum": "",
+        "boot_command": "",
+{% elif distro == "debian" %}
+        "preseed_file": "debian.preseed",
+        "iso_file": "",
+        "iso_file": "",
+        "iso_external_path": "",
+        "iso_internal_path": "",
+        "iso_checksum": "",
+        "boot_command": "",
+{% else %}
+        "preseed_file": "",
+        "kickstart_file": "",
+        "iso_file": "",
+        "iso_file": "",
+        "iso_external_path": "",
+        "iso_internal_path": "",
+        "iso_checksum": "",
+        "boot_command": "",
+{% endif %}
+        "disk_size": "{{ disk_size | default('7500') }}",
+        "output_directory": "{{ output_directory | default('build/') }}",
+        "iso_checksum_type": "{{ iso_checksum_type | default('sha256') }}",
+        "ssh_username": "{{ ssh_build_username | default('root') }}",
+        "ssh_password": "{{ ssh_password | default('root') }}",
+        "packer_cache_dir": "{{ packer_cache_dir | default('packer_cache') }}",
+        "http_directory": "{{ http_directory | default('.') }}",
+        "vm_name": "{{ vm_name | default('terrakvm') }}"
+    },
+    "builders":
+    [
+        {
+            "type": "qemu",
+            "iso_url": {{ '"{{user `iso_url`}}",' }}
+            "iso_checksum": {{ '"{{user `iso_checksum`}}",' }}
+            "iso_checksum_type": {{ '"{{ user `iso_checksum_type`}}",' }}
+            "iso_target_path": {{ '"{{user `packer_cache_dir`}}/{{user `iso_file`}}",' }}
+            "iso_urls": [
+              {{ '"{{user `iso_internal_path`}}/{{user `iso_file`}}",' }}
+              {{ '"{{user `iso_external_path`}}/{{user `iso_file`}}"' }}
+            ],
+            "output_directory": {{ '"{{user `output_directory`}}",' }}
+            "ssh_wait_timeout": "30s",
+            "shutdown_command": "systemctl poweroff",
+            "disk_size": {{ '"{{user `disk_size`}}",' }}
+            "format": "qcow2",
+            "accelerator": "kvm",
+            "vnc_bind_address": "127.0.0.1",
+            "headless": "true",
+            "qemuargs":
+            [
+                [ "-smp" , {{ '"{{user `ncpu`}}" ],' }}
+                [ "-m", {{ '"{{user `memory`}}" ]' }}
+            ],
+            "http_directory": {{ '"{{ user `http_directory` }}",' }}
+            "http_port_min": 10082,
+            "http_port_max": 10089,
+            "ssh_host_port_min": 2222,
+            "ssh_host_port_max": 2229,
+            "ssh_username": {{ '"{{ user `ssh_username`}}",' }}
+            "ssh_password": {{ '"{{ user `ssh_password`}}",' }}
+            "ssh_port": 22,
+            "ssh_wait_timeout": "30m",
+            "vm_name": {{ '"{{user `vm_name`}}",' }}
+            "net_device": "virtio-net",
+            "disk_interface": "virtio-scsi",
+            "disk_cache": "unsafe",
+            "disk_discard": "unmap",
+            "disk_compression": true,
+            "boot_command":
+            [
+{% if distro == "centos" %}
+                {{ '"<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kickstart.ks<enter><wait>"' }}
+{% endif %}
+            ]
+        }
+    ],
+    "provisioners":
+    [
+{% if distro == "centos" %}
+        {
+            "type": "shell",
+            "inline": [
+                "yum remove postfix -y",
+                "yum install cloud-init cloud-utils -y"
+            ]
+        },
+        {
+            "type": "file",
+            "source": "./99-cloudinit.cfg",
+            "destination": "/etc/cloud/cloud.cfg.d/99-cloudinit.cfg"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "rm -f /var/lib/NetworkManager/*.lease",
+                "sed -i '/HWADDR/d' /etc/sysconfig/network-scripts/ifcfg-eth0",
+                "rm -f /etc/ssh/ssh_host*key*",
+                "systemctl enable cloud-init cloud-config NetworkManager-wait-online fstrim.timer",
+                "unset HISTFILE"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline":[
+                "fstrim -v /"
+            ]
+        }
+{% endif %}
+    ]
+}
