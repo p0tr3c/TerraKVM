@@ -3,7 +3,7 @@
   gather_facts: false
   debugger: on_failed
   vars_files:
-    - - "{{ playbook_dir }}/../defaults/vars.yml"
+    - "{{ playbook_dir }}/../defaults/vars.yml"
   tasks:
     - name: Create build cache dir
       file:
@@ -15,28 +15,41 @@
       tags:
         - prep
         - packer
+      when: from_iso
     - name: Template packer instructions
       template:
         src: "../templates/packer/{{ item.name }}.j2"
         dest: "{{ packer_dir }}/{{ item.name }}"
-      when: distro in item.distro
+      when: from_iso and distro in item.distro
       with_items:
-        - { name: "template.json", distro: ["centos"] }
+        - { name: "template.json", distro: ["centos", "ubuntu"] }
         - { name: "kickstart.ks", distro: ["centos"] }
-        - { name: "variables.json", distro: ["centos"] }
-        - { name: "99-cloudinit.cfg", distro: ["centos"] }
+        - { name: "variables.json", distro: ["centos", "ubuntu"] }
+        - { name: "99-cloudinit.cfg", distro: ["centos", "ubuntu"] }
+        - { name: "preseed", distro: ["ubuntu"] }
       tags:
         - template
         - packer
+    - name: Download base cloud image
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ packer_dir }}/build/{{ item.iso_name }}"
+        mode: 0660
+        checksum: "{{ item.checksum }}"
+      with_items:
+        - { url: 'https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2', iso_name: "{{ vm_name }}", checksum: 'sha256:76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333', distro: 'centos'}
+        - { url: 'https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img', iso_name: "{{ vm_name }}", checksum: 'sha256:2d4366c9f7512c731fa1c9a5a431ec98a2bc50c4bd31e1e85777f1cbbbe0f412', distro: 'ubuntu'}
+      when: not from_iso and distro == item.distro
     - name: Template terraform instructions
       template:
         src: "../templates/terraform/{{ item.name }}.j2"
         dest: "{{ terraform_dir }}/{{ item.name }}"
       when: distro in item.distro
       with_items:
-        - { name: "main.tf", distro: ["centos"] }
-        - { name: "vars.tf", distro: ["centos"] }
-        - { name: "terraform.tfvars", distro: ["centos"] }
+        - { name: "main.tf", distro: ["centos", "ubuntu"] }
+        - { name: "vars.tf", distro: ["centos", "ubuntu"] }
+        - { name: "terraform.tfvars", distro: ["centos", "ubuntu"] }
+        - { name: "ubuntu_bug-1573095.xsl", distro: ["ubuntu"] }
       tags:
         - template
         - terraform
@@ -48,6 +61,12 @@
       tags:
         - build
         - packer
+      when: from_iso
+    - name: Destroy current infrastructure
+      terraform:
+        project_path: "{{ terraform_dir }}"
+        state: absent
+      when: force_rebuild
     - name: Deploy via terraform
       terraform:
         project_path: "{{ terraform_dir }}"

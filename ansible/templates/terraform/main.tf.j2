@@ -15,6 +15,7 @@ users:
   - name: $${ssh_user}
     lock-passwd: true
     sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
     ssh_authorized_keys:
       - $${ssh_public_key}
 EOF
@@ -69,4 +70,11 @@ resource "libvirt_domain" "dev" {
   boot_device {
     dev = ["hd", "network"]
   }
+{% if distro == 'ubuntu' and not from_iso %}
+{% raw %}
+  xml {
+    xslt = "${file("ubuntu_bug-1573095.xsl")}"
+  }
+{% endraw %}
+{% endif %}
 }
