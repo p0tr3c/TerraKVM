@@ -30,6 +30,12 @@
       tags:
         - template
         - packer
+    - name: Create download dir
+      file:
+        path: "{{ packer_dir }}/build"
+        state: directory
+        mode: 0770
+      when: not from_iso
     - name: Download base cloud image
       get_url:
         url: "{{ item.url }}"
