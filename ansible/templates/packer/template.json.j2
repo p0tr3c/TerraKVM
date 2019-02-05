@@ -10,7 +10,7 @@
         "iso_internal_path": "{{ iso_internal_path | default('') }}",
         "iso_checksum": "{{ iso_checksum | default('19d94274ef856c4dfcacb2e7cfe4be73e442a71dd65cc3fb6e46db826040b56e') }}",
         "ssh_username": "{{ ssh_build_username | default('root') }}",
-{% elif distro == "ubuntu" %}
+{% elif distro == "ubuntu16" and arch == "amd64" %}
         "ssh_username": "{{ ssh_build_username | default('dev') }}",
         "preseed_file": "preseed",
         "iso_file": "{{ iso_file | default('ubuntu-16.04.5-server-amd64.iso') }}",

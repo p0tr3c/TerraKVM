@@ -6,9 +6,9 @@ vm_name: dev
 distro: centos
 # Options: x86 | amd64
 arch: amd64
-# !!!!!!!!! use realpath
-packer_dir: "{{ playbook_dir }}/../../packer"
-terraform_dir: "{{ playbook_dir }}/../../terraform"
+packer_dir: "{{ (playbook_dir + '/../../packer') | realpath }}"
+terraform_dir: "{{ (playbook_dir + '/../../terraform') | realpath }}"
+download_cache_dir: "{{ (playbook_dir + '/../../.download_cache') | realpath }}"
 # Build vars
 mirror_address: http://mirrorlist.centos.org/
 lang: en
@@ -16,7 +16,7 @@ keyboard: uk
 timezone: Europe/London
 rootpw_hash: $6$xtq2rINRUwpoUaZx$Gstm2Pv5Jn9KIKxsIeRg/a2kpIb7Kul2NvkhxOQEiSxaPribXZzWd9sDtDbdeEtoPlF8zZ6NrKYMrXEcN85cg/
 hostname: "{{ vm_name }}"
-packer_cache_dir: "."
+packer_cache_dir: "{{ download_cache_dir }}"
 # Download vars
 cloud_image_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2
 cloud_image_sha256: 76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333
@@ -32,3 +32,36 @@ ssh_fullname: developer
 ssh_pass_hash: "{{ rootpw_hash }}"
 # apt_proxy: false
 # apt_chache_url: proxy-url
+cloud_images:
+  - url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2
+    iso_name: CentOS-7-x86_64-GenericCloud-1901.qcow2
+    checksum: sha256:76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333
+    distro: centos
+    arch: amd64
+  - url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
+    iso_name: bionic-server-cloudimg-amd64.img
+    checksum: sha256:2ad5c311a4324ed4911ee9a1fc88bbe822acb84df61791d1dea583314d53f952
+    distro: ubuntu
+    arch: amd64
+  - url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-i386.img
+    iso_name: bionic-server-cloudimg-i386.img
+    checksum: sha256:6081baaa47127b06d0059050a020db96c5f6a12f477ce4d29f22163743c3a840
+    distro: ubuntu
+    arch: "x86"
+  - url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
+    iso_name: xenial-server-cloudimg-amd64-disk1.img
+    checksum: sha256:2d4366c9f7512c731fa1c9a5a431ec98a2bc50c4bd31e1e85777f1cbbbe0f412
+    distro: ubuntu16
+    arch: amd64
+  - url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-i386-disk1.img
+    iso_name: xenial-server-cloudimg-i386-disk1.img
+    checksum: sha256:9d1be474c30bfbbde490c9eadd0eb9481de33923fa34bcceea97a2d7a54bba75
+    distro: ubuntu16
+    arch: "x86"
+  - url: https://cdimage.debian.org/cdimage/openstack/current/debian-9.7.0-openstack-amd64.qcow2
+    iso_name: debian-9.7.0-openstack-amd64.qcow2
+    checksum: sha256:3b789864962561c54ed4ebc4abd261470fecfe99c8e8e3ae242a72c03bf5a82f
+    distro: debian
+    arch: amd64
+# json queries
+terraform_iso_filter: "[?distro=='{{ distro }}' && arch=='{{ arch }}'].iso_name"

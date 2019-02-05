@@ -39,12 +39,10 @@
     - name: Download base cloud image
       get_url:
         url: "{{ item.url }}"
-        dest: "{{ packer_dir }}/build/{{ item.iso_name }}"
+        dest: "{{ download_cache_dir }}/{{ item.iso_name }}"
         mode: 0660
         checksum: "{{ item.checksum }}"
-      with_items:
-        - { url: 'https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2', iso_name: "{{ vm_name }}", checksum: 'sha256:76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333', distro: 'centos'}
-        - { url: 'https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img', iso_name: "{{ vm_name }}", checksum: 'sha256:2d4366c9f7512c731fa1c9a5a431ec98a2bc50c4bd31e1e85777f1cbbbe0f412', distro: 'ubuntu'}
+      with_items: "{{ cloud_images }}"
       when: not from_iso and distro == item.distro
     - name: Template terraform instructions
       template:
@@ -52,10 +50,10 @@
         dest: "{{ terraform_dir }}/{{ item.name }}"
       when: distro in item.distro
       with_items:
-        - { name: "main.tf", distro: ["centos", "ubuntu"] }
-        - { name: "vars.tf", distro: ["centos", "ubuntu"] }
-        - { name: "terraform.tfvars", distro: ["centos", "ubuntu"] }
-        - { name: "ubuntu_bug-1573095.xsl", distro: ["ubuntu"] }
+        - { name: "main.tf", distro: ["centos", "ubuntu", "ubuntu16", "debian"] }
+        - { name: "vars.tf", distro: ["centos", "ubuntu", "ubuntu16", "debian"] }
+        - { name: "terraform.tfvars", distro: ["centos", "ubuntu", "ubuntu16", "debian"] }
+        - { name: "ubuntu_bug-1573095.xsl", distro: ["ubuntu", "ubuntu16"] }
       tags:
         - template
         - terraform

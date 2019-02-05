@@ -1,3 +1,6 @@
 network_name = "{{ vm_name }}"
 ssh_username = "{{ ssh_username }}"
 ssh_public_key = "{{ ssh_public_key | b64decode }}"
+{% if not from_iso %}
+packer_image = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_iso_filter) | join('')}}"
+{% endif %}
