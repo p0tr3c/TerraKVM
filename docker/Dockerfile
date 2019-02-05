@@ -116,33 +116,24 @@ RUN pip install virtualenvwrapper
 # Copy wait-for-it.sh
 COPY wait-for-it.sh /usr/local/sbin/wait-for-it.sh
 
+# Copy requirements
+COPY requirements.txt requirements.txt
+
+# Initialize env and install dependencies
+RUN pip install -r requirements.txt
+
 # Run as $USER_NAME user
 USER $USER_NAME
 
 # Default ansible logs
 RUN mkdir /home/$USER_NAME/.ansible
 
-# Setup virtualenvs
-RUN mkdir /home/$USER_NAME/.Envs
-RUN echo "export WORKON_HOME=~/.Envs" >> /home/$USER_NAME/.bashrc
-RUN echo "source /usr/local/bin/virtualenvwrapper.sh" >> /home/$USER_NAME/.bashrc
-
-# Copy requirements
-COPY requirements.txt requirements.txt
-
-# Initialize env and install dependencies
-ENV WORKON_HOME=/home/$USER_NAME/.Envs
-RUN source /usr/local/bin/virtualenvwrapper.sh && \
-    mkvirtualenv os-$USER_NAME && \
-    workon os-$USER_NAME && \
-    pip install -r requirements.txt
-
 # Configure git caching
 RUN git config --global credential.helper cache
 
 # Mount local repo
-VOLUME /data
+VOLUME /TerraKVM
 
-WORKDIR /data
+WORKDIR /TerraKVM/ansible
 
 CMD ["/bin/bash"]
