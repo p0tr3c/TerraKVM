@@ -21,6 +21,17 @@ Deploy VMs on [KVM](https://www.linux-kvm.org/page/Main_Page) via [docker](https
 - Ubuntu Bionic x86 (`-e 'distro=ubuntu' -e 'arch=x86'`)
 - Debian 9.7.0  x86_64 (`-e 'distro=debian'`)
 
+# Custom Images
+
+By default qcow2 images are downloaded from official distribution sites.
+
+Use `-e 'from_iso=true'` to build custom images via [packer](https://www.packer.io/)
+
+You can modify various variables in [vars.yml](ansible/default/vars.yml) to specify keyboard layout, language etc.
+
+More granular modification can be performed in [template.json.j2](ansible/templates/packer/template.json.j2).  
+This is where you can add provisioners
+
 # Requirements
 
 - libvirt
