@@ -16,6 +16,14 @@
         - prep
         - packer
       when: from_iso
+    - name: Create SSH key
+      block:
+        - command: ssh-keygen -f "{{ repo_dir }}/dev.pkey" -N ""
+          args:
+            creates: "{{ repo_dir }}/dev.pkey"
+        - set_fact:
+            ssh_public_key: "{{ lookup('file', repo_dir + '/dev.pkey.pub') | b64encode }}"
+      when: ssh_public_key is not defined
     - name: Template packer instructions
       template:
         src: "../templates/packer/{{ item.name }}.j2"

@@ -6,6 +6,7 @@ vm_name: dev
 distro: centos
 # Options: x86 | amd64
 arch: amd64
+repo_dir: "{{ (playbook_dir + '/../../') | realpath }}"
 packer_dir: "{{ (playbook_dir + '/../../packer') | realpath }}"
 terraform_dir: "{{ (playbook_dir + '/../../terraform') | realpath }}"
 download_cache_dir: "{{ (playbook_dir + '/../../.download_cache') | realpath }}"
@@ -23,7 +24,8 @@ cloud_image_sha256: 76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e
 cloud_image_file: CentOS-7-x86_64-GenericCloud-1901.qcow2
 # SSH users
 ssh_username: dev
-ssh_public_key: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCQVFESU1wRmpGY2RaVzl5ZkZNR2QxRDExOXcvblgrWlJNUGlrVlg1Q3ZLTVdvODR0WGYzSXFuQXRHdkRUWWpQS20wVHdoWHlORk1iTGNGQWNYMnM5ZTZwa3NVYllHQkFEa2ppVTFVd2Y2MmdBOUgvK3A3Mm8vYTVYRmdxekRqb2Z0RW5IdVIwbmNJRGFNV1BORWdDMmk5MnpvZ01DUm5iN1I0RHovYlR5cXZnUUtSbU1FTFlHS3NpQ1Z1Q3hKNjN1NzJlL0dUTGdYb1o5RExMWDhUMEYvWW5EdWw1WXFjNU94SVQ5Wm54ZE9LRVdDY2dLU083ZGdLbFZlNi9ibkpKNHpyMjNJTXZJRjRERi9CYm1xQnpnc1luM1lqYWR0NHFFVTBUalVINnUzcnhyekRrR1M2Wnc5TDF0R1NXam52TjVNMzdsd2dPZ0hIRFppMXhVZ0thOFoyVGYgdGVycmFrdm1AcHduYm94
+# To use predefined key, uncomment below and paste b64 encoded public key
+# ssh_public_key: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCQVFESU1wRmpGY2RaVzl5ZkZNR2QxRDExOXcvblgrWlJNUGlrVlg1Q3ZLTVdvODR0WGYzSXFuQXRHdkRUWWpQS20wVHdoWHlORk1iTGNGQWNYMnM5ZTZwa3NVYllHQkFEa2ppVTFVd2Y2MmdBOUgvK3A3Mm8vYTVYRmdxekRqb2Z0RW5IdVIwbmNJRGFNV1BORWdDMmk5MnpvZ01DUm5iN1I0RHovYlR5cXZnUUtSbU1FTFlHS3NpQ1Z1Q3hKNjN1NzJlL0dUTGdYb1o5RExMWDhUMEYvWW5EdWw1WXFjNU94SVQ5Wm54ZE9LRVdDY2dLU083ZGdLbFZlNi9ibkpKNHpyMjNJTXZJRjRERi9CYm1xQnpnc1luM1lqYWR0NHFFVTBUalVINnUzcnhyekRrR1M2Wnc5TDF0R1NXam52TjVNMzdsd2dPZ0hIRFppMXhVZ0thOFoyVGYgdGVycmFrdm1AcHduYm94
 # Ubuntu
 language: en
 country: CA
