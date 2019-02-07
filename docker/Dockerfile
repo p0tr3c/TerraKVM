@@ -10,6 +10,8 @@ ARG USER_UID="1000"
 ARG USER_GID="1000"
 ARG USER_NAME="terrakvm"
 ARG GROUP_NAME="terrakvm"
+ARG LIBVIRT_GID
+ARG KVM_GID
 
 # Update image
 ENV DEBIAN_FRONTEND=noninteractive
@@ -89,6 +91,17 @@ COPY ansible.cfg /etc/ansible/ansible.cfg
 # Create non-root user
 RUN groupadd -r -g ${USER_GID} ${GROUP_NAME} &&  \
     useradd -r -m -u ${USER_UID} -g ${GROUP_NAME} -G sudo -s /bin/bash ${USER_NAME}
+
+# Requried for ubuntu distro
+# Add libvirt groups
+RUN if [ ! -z "$LIBVIRT_GID" ] ; then \
+        groupadd -r -g ${LIBVIRT_GID} libvirt; \
+        usermod -a -G libvirt "$USER_NAME"; \
+    fi
+RUN if [ ! -z "$KVM_GID" ]; then\
+        groupmod -g ${KVM_GID} kvm; \
+        usermod -a -G kvm "$USER_NAME"; \
+    fi
 
 # Install libvirt provider
 ENV LIBVIRT_TERRAFORM_VERSION 0.5.1

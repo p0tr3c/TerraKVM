@@ -4,3 +4,12 @@ ssh_public_key = "{{ ssh_public_key | b64decode }}"
 {% if not from_iso %}
 packer_image = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_iso_filter) | join('')}}"
 {% endif %}
+network_cidr =  "{{ network_cidr | default('172.32.1.0/24') }}"
+address =  "{{ address | default('172.32.1.254') }}"
+volume_pool =  "{{ volume_pool | default('default') }}"
+network_name =  "{{ network_name | default('dev') }}"
+network_mode =  "{{ network_mode | default('nat') }}"
+packer_image =  "{{ packer_image | default('../packer/build/dev') }}"
+ncpu =  "{{ ncpu  | default('4') }}"
+memory =  "{{ memory | default('2048') }}"
+hostname =  "{{ hostname | default('dev') }}"

@@ -18,10 +18,16 @@ timezone: Europe/London
 rootpw_hash: $6$xtq2rINRUwpoUaZx$Gstm2Pv5Jn9KIKxsIeRg/a2kpIb7Kul2NvkhxOQEiSxaPribXZzWd9sDtDbdeEtoPlF8zZ6NrKYMrXEcN85cg/
 hostname: "{{ vm_name }}"
 packer_cache_dir: "{{ download_cache_dir }}"
-# Download vars
-cloud_image_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2
-cloud_image_sha256: 76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333
-cloud_image_file: CentOS-7-x86_64-GenericCloud-1901.qcow2
+# Terraform vars
+network_cidr: 172.32.1.0/24
+address: 172.32.1.254
+volume_pool: default
+network_name: dev
+network_mode: nat
+packer_image: ../packer/build/dev
+ncpu: 4
+memory: 2048
+hostname: dev
 # SSH users
 ssh_username: dev
 # To use predefined key, uncomment below and paste b64 encoded public key
@@ -64,6 +70,11 @@ cloud_images:
     iso_name: debian-9.7.0-openstack-amd64.qcow2
     checksum: sha256:3b789864962561c54ed4ebc4abd261470fecfe99c8e8e3ae242a72c03bf5a82f
     distro: debian
+    arch: amd64
+  - url: http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/x86_64/alpine-virt-3.9.0-x86_64.iso
+    iso_name: alpine-virt-3.9.0-x86_64.iso
+    checksum: sha256:e87e0256d10ca2125455fb5023687b2346740a8cbae54972312fe1626f07494c
+    distro: alpine
     arch: amd64
 # json queries
 terraform_iso_filter: "[?distro=='{{ distro }}' && arch=='{{ arch }}'].iso_name"
