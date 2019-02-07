@@ -1,9 +1,9 @@
 # TerraKVM
 Deploy VMs on [KVM](https://www.linux-kvm.org/page/Main_Page) via [docker](https://www.docker.com/)/[ansible](https://www.ansible.com/)/[terraform](https://www.terraform.io/)
 
-** Under development **
-** Only tested on Arch Linux **
-** Permissions issues between distros are likely ***
+** Under development **  
+** Only tested on Arch Linux **  
+** Permissions issues between distros are likely **  
 
 # Quick start
 
