@@ -2,13 +2,19 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-locals {
-  network_id = "${libvirt_network.dev.id}"
-  disk_id = "${libvirt_volume.dev_root.id}"
-  cloudinit_iso = "${libvirt_cloudinit_disk.dev.id}"
+{% if network_name is defined %}
+resource "libvirt_network" "dev" {
+  name = "${var.network_name}"
+  mode = "${var.network_mode}"
+  addresses = ["${var.network_cidr}"]
+  dhcp {
+    enabled = "${var.dhcp_enabled}"
+  }
 }
+{% endif %}
 
-data "template_file" "user_data" {
+{% for vm in vms %}
+data "template_file" "{{ vm.vm_name }}_user_data" {
   template = <<EOF
 #cloud-config
 users:
@@ -18,6 +24,9 @@ users:
     shell: /bin/bash
     ssh_authorized_keys:
       - $${ssh_public_key}
+{% if vm.cloud_init_config is defined %}
+{{ vm.cloud_init_config }}
+{% endif %}
 EOF
   vars {
     ssh_user = "${var.ssh_username}"
@@ -25,52 +34,50 @@ EOF
   }
 }
 
-resource "libvirt_cloudinit_disk" "dev" {
-  name       = "${format("%s_%s", var.vm_name, "cloudinit")}"
-  user_data  = "${data.template_file.user_data.rendered}"
+resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
+  name       = "{{ vm.vm_name }}_cloudinit.iso"
+  user_data  = "${data.template_file.{{ vm.vm_name }}_user_data.rendered}"
   meta_data  = <<EOF
-    local-hostname: ${var.vm_name}
+    local-hostname: ${var.{{ vm.vm_name }}_vm_name}
 EOF
   pool       = "${var.volume_pool}"
 }
 
-
-resource "libvirt_volume" "dev_root" {
-  name = "${format("%s-%s", var.vm_name, "root")}"
+resource "libvirt_volume" "{{ vm.vm_name }}_root" {
+  name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "root")}"
   pool = "${var.volume_pool}"
-  source = "${var.packer_image}"
+  source = "${var.{{ vm.vm_name }}_packer_image}"
 }
 
-resource "libvirt_network" "dev" {
-  name = "${var.network_name}"
-  mode = "${var.network_mode}"
-  addresses = ["${var.network_cidr}"]
-  dhcp {
-    enabled = "${var.dhcp_enabled}"
-  }
-}
-
-resource "libvirt_domain" "dev" {
-  name = "${var.vm_name}"
-  vcpu = "${var.ncpu}"
-  memory = "${var.memory}"
-  cloudinit = "${local.cloudinit_iso}"
+resource "libvirt_domain" "{{ vm.vm_name }}" {
+  name = "${var.{{ vm.vm_name }}_vm_name}"
+  vcpu = "${var.{{ vm.vm_name }}_ncpu}"
+  memory = "${var.{{ vm.vm_name }}_memory}"
+  cloudinit = "${libvirt_cloudinit_disk.{{ vm.vm_name }}.id}"
   # Provide hostname, and address via cloudinit, as in generic image
   network_interface {
-    network_id = "${local.network_id}"
+{% if network_name is defined %}
+    network_id = "${libvirt_network.dev.id}"
+{% else %}
+    network_name = "${var.{{ vm.vm_name }}_network_name}"
+{% endif %}
+{% if not dhcp_enabled %}
     wait_for_lease = false
-    hostname = "${var.hostname}"
-    addresses = ["${var.address}"]
+    addresses = ["${var.{{ vm.vm_name }}_address}"]
+{% else %}
+    wait_for_lease = true
+{% endif %}
+    hostname = "${var.{{ vm.vm_name }}_hostname}"
   }
   disk = [
     {
-      volume_id = "${local.disk_id}"
+      volume_id = "${libvirt_volume.{{ vm.vm_name }}_root.id}"
     }
   ]
   boot_device {
     dev = ["hd", "network"]
   }
-{% if distro == 'ubuntu' and not from_iso %}
+{% if vm.distro == 'ubuntu' and not from_iso %}
 {% raw %}
   xml {
     xslt = "${file("ubuntu_bug-1573095.xsl")}"
@@ -78,3 +85,4 @@ resource "libvirt_domain" "dev" {
 {% endraw %}
 {% endif %}
 }
+{% endfor %}

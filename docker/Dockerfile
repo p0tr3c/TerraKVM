@@ -42,6 +42,7 @@ RUN apt-get update -q && \
     qemu \
     qemu-kvm \
     libguestfs-tools \
+    xsltproc \
      -y && \
     apt-get clean && \
     apt-get autoclean && \

@@ -1,0 +1,12 @@
+{% for vm in vms %}
+output "{{ vm.vm_name }}" { value = "${
+    map(
+{% if dhcp_enabled %}
+      "public_ip", "${libvirt_domain.{{ vm.vm_name }}.network_interface.0.addresses.0}",
+{% else %}
+      "public_ip", "${var.{{ vm.vm_name }}_address}",
+{% endif %}
+      "ssh_username", "${var.ssh_username}"
+    )}"
+}
+{% endfor %}

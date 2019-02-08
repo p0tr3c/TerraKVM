@@ -1,0 +1,53 @@
+shared_cloud_config: |
+  yum_repos:
+      epel:
+        name: Extra Packages for Enterprise Linux 7 - $basearch
+        baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch
+        metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=$basearch
+        failovermethod: priority
+        enabled: 1
+        gpgcheck: 1
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+      epel-debuginfo:
+        name: Extra Packages for Enterprise Linux 7 - $basearch - Debug
+        baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch/debug
+        metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-debug-7&arch=$basearch
+        failovermethod: priority
+        enabled: 0
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+        gpgcheck: 1
+      epel-source:
+        name: Extra Packages for Enterprise Linux 7 - $basearch - Source
+        baseurl: http://download.fedoraproject.org/pub/epel/7/SRPMS
+        metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-source-7&arch=$basearch
+        failovermethod: priority
+        enabled: 0
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+        gpgcheck: 1
+network_name: kernel_debugging
+dhcp_enabled: false
+network_mode: nat
+volume_pool: common
+network_cidr: 172.33.1.0/24
+provisioning_tasks: "{{ repo_dir }}/ansible/kernel_debugger_provisioner.yml"
+vms:
+  - hostname: dev-client
+    vm_name: dev-client
+    from_iso: false
+    distro: centos
+    arch: amd64
+    ncpu: 4
+    memory: 2048
+    network_name: default
+    address: 172.33.1.254
+    cloud_init_config: "{{ shared_cloud_config }}"
+  - hostname: dev-server
+    vm_name: dev-server
+    from_iso: false
+    distro: centos
+    arch: amd64
+    ncpu: 4
+    memory: 2048
+    network_name: default
+    address: 172.33.1.253
+    cloud_init_config: "{{ shared_cloud_config }}"

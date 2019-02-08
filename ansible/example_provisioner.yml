@@ -1,0 +1,20 @@
+- name: Install GDB
+  yum:
+    name: "{{ gdb_packages }}"
+    state: present
+    update_cache: true
+  become: true
+  vars:
+    gdb_packages:
+      - gdb
+      - gdb-gdbserver
+      - '@Development Tools'
+  delegate_to: "{{ item }}"
+  loop: "{{groups['terrakvm']}}"
+- name: Deploy shared key
+  copy:
+    src: "{{ repo_dir }}/dev.pkey"
+    dest: ~/.ssh/id_rsa
+    mode: 0600
+  delegate_to: "{{ item }}"
+  loop: "{{groups['terrakvm']}}"

@@ -20,9 +20,8 @@ hostname: "{{ vm_name }}"
 packer_cache_dir: "{{ download_cache_dir }}"
 # Terraform vars
 network_cidr: 172.32.1.0/24
-address: 172.32.1.254
 volume_pool: default
-network_name: dev
+#network_name: dev
 network_mode: nat
 packer_image: ../packer/build/dev
 ncpu: 4
@@ -40,29 +39,74 @@ ssh_fullname: developer
 ssh_pass_hash: "{{ rootpw_hash }}"
 # apt_proxy: false
 # apt_chache_url: proxy-url
+dhcp_enabled: true
+vms:
+#  - hostname: dev-client
+#    vm_name: dev-client
+#    from_iso: false
+#    distro: centos
+#    arch: amd64
+#    ncpu: 4
+#    memory: 2048
+#    network_name: default
+#    address: 172.33.1.254
+#    cloud_init_config: |
+#      yum_repos:
+#          epel:
+#            name: Extra Packages for Enterprise Linux 7 - $basearch
+#            baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch
+#            metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=$basearch
+#            failovermethod: priority
+#            enabled: 1
+#            gpgcheck: 1
+#            gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+#          epel-debuginfo:
+#            name: Extra Packages for Enterprise Linux 7 - $basearch - Debug
+#            baseurl: http://download.fedoraproject.org/pub/epel/7/$basearch/debug
+#            metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-debug-7&arch=$basearch
+#            failovermethod: priority
+#            enabled: 0
+#            gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+#            gpgcheck: 1
+#          epel-source:
+#            name: Extra Packages for Enterprise Linux 7 - $basearch - Source
+#            baseurl: http://download.fedoraproject.org/pub/epel/7/SRPMS
+#            metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-source-7&arch=$basearch
+#            failovermethod: priority
+#            enabled: 0
+#            gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+#            gpgcheck: 1
+  - hostname: dev
+    vm_name: dev
+    from_iso: false
+    distro: centos
+    arch: amd64
+    ncpu: 4
+    memory: 2048
+    network_name: default
 cloud_images:
   - url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2
     iso_name: CentOS-7-x86_64-GenericCloud-1901.qcow2
     checksum: sha256:76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333
     distro: centos
     arch: amd64
-  - url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
+  - url: https://cloud-images.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-cloudimg-amd64.img
     iso_name: bionic-server-cloudimg-amd64.img
-    checksum: sha256:2ad5c311a4324ed4911ee9a1fc88bbe822acb84df61791d1dea583314d53f952
+    checksum: sha256:6f18b85cd1f5f8a46d3c07fef61b4075d50cb0b9e16471d554375075b7d3f574
     distro: ubuntu
     arch: amd64
-  - url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-i386.img
+  - url: https://cloud-images.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-cloudimg-i386.img
     iso_name: bionic-server-cloudimg-i386.img
-    checksum: sha256:6081baaa47127b06d0059050a020db96c5f6a12f477ce4d29f22163743c3a840
+    checksum: sha256:50e58c2bab851a404fc04575a1ccb1c2856ad10d269243622658b01216a4b8c2
     distro: ubuntu
     arch: "x86"
-  - url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
-    iso_name: xenial-server-cloudimg-amd64-disk1.img
+  - url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
+    iso_name: ubuntu-16.04-server-cloudimg-amd64-disk1.img
     checksum: sha256:2d4366c9f7512c731fa1c9a5a431ec98a2bc50c4bd31e1e85777f1cbbbe0f412
     distro: ubuntu16
     arch: amd64
-  - url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-i386-disk1.img
-    iso_name: xenial-server-cloudimg-i386-disk1.img
+  - url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-i386-disk1.img
+    iso_name: ubuntu-16.04-server-cloudimg-i386-disk1.img
     checksum: sha256:9d1be474c30bfbbde490c9eadd0eb9481de33923fa34bcceea97a2d7a54bba75
     distro: ubuntu16
     arch: "x86"
@@ -78,3 +122,4 @@ cloud_images:
     arch: amd64
 # json queries
 terraform_iso_filter: "[?distro=='{{ distro }}' && arch=='{{ arch }}'].iso_name"
+download_filter: "[?distro=='{{ item.distro }}' && arch=='{{ item.arch }}']"
