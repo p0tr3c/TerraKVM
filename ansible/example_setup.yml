@@ -27,9 +27,9 @@ shared_cloud_config: |
 network_name: kernel_debugging
 dhcp_enabled: false
 network_mode: nat
-volume_pool: common
+volume_pool: default
 network_cidr: 172.33.1.0/24
-provisioning_tasks: "{{ repo_dir }}/ansible/kernel_debugger_provisioner.yml"
+provisioning_tasks: "{{ repo_dir }}/ansible/example_provisioner.yml"
 vms:
   - hostname: dev-client
     vm_name: dev-client
