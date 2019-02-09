@@ -12,6 +12,7 @@ ARG USER_NAME="terrakvm"
 ARG GROUP_NAME="terrakvm"
 ARG LIBVIRT_GID
 ARG KVM_GID
+ARG WHEEL_GID
 
 # Update image
 ENV DEBIAN_FRONTEND=noninteractive
@@ -103,12 +104,15 @@ RUN if [ ! -z "$KVM_GID" ]; then\
         usermod -a -G kvm "$USER_NAME"; \
     fi
 
+
 # Install libvirt provider
 ENV LIBVIRT_TERRAFORM_VERSION 0.5.1
 RUN wget https://github.com/dmacvicar/terraform-provider-libvirt/releases/download/v$LIBVIRT_TERRAFORM_VERSION/terraform-provider-libvirt-$LIBVIRT_TERRAFORM_VERSION.Ubuntu_18.04.amd64.tar.gz && \
     tar -zxvf terraform-provider-libvirt-$LIBVIRT_TERRAFORM_VERSION.Ubuntu_18.04.amd64.tar.gz && \
     mkdir -p /home/$USER_NAME/.terraform.d/plugins && \
+    mkdir -p /root/.terraform.d/plugins && \
     cp terraform-provider-libvirt /home/$USER_NAME/.terraform.d/plugins/ && \
+    cp terraform-provider-libvirt /root/.terraform.d/plugins/ && \ 
     chown $USER_NAME:$USER_NAME -R /home/$USER_NAME/ &&  \
     chmod 0755 /home/$USER_NAME/.terraform.d/plugins/terraform-provider-libvirt && \
     rm -rf /tmp/build/*
