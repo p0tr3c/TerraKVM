@@ -7,6 +7,13 @@
   tasks:
     - name: Debug
       debug:
+        msg: "{{ vms | json_query('[*].distro') }}"
+    - name: Debug
+      debug:
+        msg: "{{ cloud_images | json_query(download_filter) | json_query('[*].url')}}"
+      with_items: "{{ vms }}"
+    - name: Debug
+      debug:
         msg: "{{ cloud_images | json_query(query)}}"
       vars:
         query: "[?distro=='{{ distro }}' && arch=='{{ arch }}'].iso_name"
