@@ -99,10 +99,23 @@
         ansible_ssh_host: "{{ item.value.value.public_ip }}"
         ansible_ssh_private_key_file: "{{ repo_dir }}/dev.pkey"
       with_dict: "{{ terraform_output.outputs }}"
-    - name: Include provisioning
+    - name: Include global provisioning
       include_tasks:
         file: "{{ provisioning_tasks }}"
       when: provisioning_tasks is defined
+    - name: Include per-host provisioning
+      include_tasks:
+        file: "{{ delegation.provisioning_playbook }}"
+      loop: "{{ vms }}"
+      loop_control:
+        loop_var: delegation
+      when: delegation.provisioning_playbook is defined
+    - name: Create ssh config
+      template:
+        src: "../templates/ssh/config"
+        dest: "{{ repo_dir }}/ssh_config"
+        mode: 0600
+      with_dict: "{{ terraform_output.outputs }}"
     - name: Connection information
       debug:
         msg: [
