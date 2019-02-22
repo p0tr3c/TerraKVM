@@ -11,7 +11,7 @@ Deploy VMs on [KVM](https://www.linux-kvm.org/page/Main_Page) via [docker](https
 2. `cd TerraKVM`
 3. Clone [TerraKVM](https://github.com/p0tr3c/TerraKVM)
 4. Deploy VM by running `sudo docker-compose run terrakvm ansible-playbook playbooks/deploy.yml`
-5. SSH to VM by running `ssh -i dev.pkey dev@172.32.1.254`
+5. SSH to VM by running `ssh -F dev.config dev`
 6. To remove VM run `sudo docker-compose run terrakvm ansible-playbook playbooks/destroy.yml`
 
 # Demo
