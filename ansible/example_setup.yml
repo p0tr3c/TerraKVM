@@ -1,3 +1,4 @@
+project_name: dev
 shared_cloud_config: |
   yum_repos:
       epel:

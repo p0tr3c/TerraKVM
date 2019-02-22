@@ -16,20 +16,25 @@
         - prep
         - packer
       when: from_iso
+    - name: Create project directory
+      file:
+        path: "{{ terraform_dir }}"
+        state: directory
+        mode: 0700
     - name: Create SSH key
       block:
-        - command: ssh-keygen -f "{{ repo_dir }}/dev.pkey" -N ""
+        - command: ssh-keygen -f "{{ terraform_dir }}/{{ project_name}}.pkey" -N ""
           args:
-            creates: "{{ repo_dir }}/dev.pkey"
+            creates: "{{ terraform_dir }}/{{ project_name }}.pkey"
         - set_fact:
-              ssh_public_key: "{{ lookup('file', repo_dir + '/dev.pkey.pub') | b64encode }}"
+              ssh_public_key: "{{ lookup('file',  terraform_dir + '/' + project_name  + '.pkey.pub') | b64encode }}"
       when: ssh_public_key is not defined
       tags:
         - template
         - ssh
     - name: Template packer instructions
       template:
-        src: "../templates/packer/{{ item.name }}.j2"
+        src: "{{ packer_dir }}/{{ item.name }}.j2"
         dest: "{{ packer_dir }}/{{ item.name }}"
       when: from_iso and distro in item.distro
       with_items:
@@ -57,7 +62,7 @@
       when: not item.from_iso
     - name: Template terraform instructions
       template:
-        src: "../templates/terraform/{{ item.name }}.j2"
+        src: "{{ template_dir }}/terraform/{{ item.name }}.j2"
         dest: "{{ terraform_dir }}/{{ item.name }}"
       with_items:
         - { name: "main.tf" }
@@ -97,7 +102,7 @@
         group: terrakvm
         ansible_ssh_user: "{{ item.value.value.ssh_username }}"
         ansible_ssh_host: "{{ item.value.value.public_ip }}"
-        ansible_ssh_private_key_file: "{{ repo_dir }}/dev.pkey"
+        ansible_ssh_private_key_file: "{{ terraform_dir }}/{{ project_name}}.pkey"
       with_dict: "{{ terraform_output.outputs }}"
     - name: Include global provisioning
       include_tasks:
@@ -112,14 +117,14 @@
       when: delegation.provisioning_playbook is defined
     - name: Create ssh config
       template:
-        src: "../templates/ssh/config"
-        dest: "{{ repo_dir }}/ssh_config"
+        src: "{{ template_dir }}/ssh/config"
+        dest: "{{ repo_dir }}/{{ project_name }}.config"
         mode: 0600
       with_dict: "{{ terraform_output.outputs }}"
     - name: Connection information
       debug:
         msg: [
           "Server: {{ item.key }}",
-          "Connect: ssh -i dev.pkey {{ item.value.value.ssh_username}}@{{ item.value.value.public_ip }}"
+          "Connect: ssh -i {{ terraform_dir }}/{{ project_name }}.pkey {{ item.value.value.ssh_username}}@{{ item.value.value.public_ip }}"
       ]
       with_dict: "{{ terraform_output.outputs }}"
