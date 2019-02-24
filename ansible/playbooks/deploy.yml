@@ -70,6 +70,7 @@
         - { name: "terraform.tfvars" }
         - { name: "ubuntu_bug-1573095.xsl" }
         - { name: "output.tf" }
+        - { name: "inventory.tpl"}
       tags:
         - template
         - terraform

@@ -25,11 +25,7 @@ shared_cloud_config: |
         enabled: 0
         gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
         gpgcheck: 1
-network_name: kernel_debugging
-dhcp_enabled: false
-network_mode: nat
 volume_pool: default
-network_cidr: 172.33.1.0/24
 provisioning_tasks: "{{ repo_dir }}/ansible/example_provisioner.yml"
 vms:
   - hostname: dev-client
@@ -39,8 +35,11 @@ vms:
     arch: amd64
     ncpu: 4
     memory: 2048
-    network_name: default
-    address: 172.33.1.254
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
     cloud_init_config: "{{ shared_cloud_config }}"
   - hostname: dev-server
     vm_name: dev-server
@@ -49,6 +48,9 @@ vms:
     arch: amd64
     ncpu: 4
     memory: 2048
-    network_name: default
-    address: 172.33.1.253
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
     cloud_init_config: "{{ shared_cloud_config }}"

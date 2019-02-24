@@ -2,15 +2,17 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-{% if network_name is defined %}
-resource "libvirt_network" "dev" {
-  name = "${var.network_name}"
-  mode = "${var.network_mode}"
-  addresses = ["${var.network_cidr}"]
+{% if networks is defined %}
+{% for net in networks %}
+resource "libvirt_network" "{{ net.network_name }}" {
+  name = "${var.{{ net.network_name }}}"
+  mode = "${var.{{ net.network_name }}_mode}"
+  addresses = ["${var.{{ net.network_name }}_cidr}"]
   dhcp {
-    enabled = "${var.dhcp_enabled}"
+    enabled = "${var.{{ net.network_name }}_dhcp}"
   }
 }
+{% endfor %}
 {% endif %}
 
 {% for vm in vms %}
@@ -43,11 +45,25 @@ EOF
   pool       = "${var.volume_pool}"
 }
 
-resource "libvirt_volume" "{{ vm.vm_name }}_root" {
-  name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "root")}"
+{% for disk in vm.disks %}
+{% if disk.grow is defined and disk.grow %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}_base" {
+  name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}_base")}"
   pool = "${var.volume_pool}"
-  source = "${var.{{ vm.vm_name }}_packer_image}"
+  source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
 }
+{% endif %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
+  name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}")}"
+  pool = "${var.volume_pool}"
+{% if disk.grow is defined and disk.grow %}
+  base_volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}_base.id}"
+  size = "{{ disk.size }}"
+{% else %}
+  source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
+{% endif %}
+}
+{% endfor %}
 
 resource "libvirt_domain" "{{ vm.vm_name }}" {
   name = "${var.{{ vm.vm_name }}_vm_name}"
@@ -55,24 +71,33 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
   memory = "${var.{{ vm.vm_name }}_memory}"
   cloudinit = "${libvirt_cloudinit_disk.{{ vm.vm_name }}.id}"
   # Provide hostname, and address via cloudinit, as in generic image
+{% for net in vm.networks %}
   network_interface {
-{% if network_name is defined %}
-    network_id = "${libvirt_network.dev.id}"
-{% else %}
-    network_name = "${var.{{ vm.vm_name }}_network_name}"
-{% endif %}
-{% if not dhcp_enabled %}
-    wait_for_lease = false
-    addresses = ["${var.{{ vm.vm_name }}_address}"]
-{% else %}
+  {% if net.bridge is defined %}
+    bridge = "{{ net.bridge }}"
+  {% else %}
+    {% if net.external is defined and net.external %}
+    network_name = "${var.{{ vm.vm_name }}_{{ net.network_name }}}"
+    {% else %}
+    network_id = "${libvirt_network.{{ net.network_name}}.id}"
+    {% endif %}
+    {% if net.address is not defined %}
     wait_for_lease = true
-{% endif %}
+    {% else %}
+    wait_for_lease = false
+    addresses = ["${var.{{ vm.vm_name }}_{{ net.network_name }}_address}"]
+    {% endif %}
     hostname = "${var.{{ vm.vm_name }}_hostname}"
+  {% endif %}
   }
+{% endfor %}
   disk = [
+{% for disk in vm.disks %}
     {
-      volume_id = "${libvirt_volume.{{ vm.vm_name }}_root.id}"
-    }
+      volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}.id}"
+    }{% if not loop.last -%},{%- endif %}
+
+{% endfor %}
   ]
   boot_device {
     dev = ["hd", "network"]
@@ -86,3 +111,22 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
 {% endif %}
 }
 {% endfor %}
+
+data "template_file" "inventory" {
+   template = "${file("inventory.tpl")}"
+   vars {
+       ssh_user = "${var.ssh_username}"
+       pkey_file_path = "${var.ssh_private_key_file}"
+{% for vm in vms %}
+{% if vm.networks.0.address is defined %}
+      {{ vm.vm_name }}_address = "${var.{{ vm.vm_name }}_{{ vm.networks.0.network_name }}_address}"
+{% else %}
+      {{ vm.vm_name }}_address = "${libvirt_domain.{{ vm.vm_name }}.network_interface.0.addresses.0}"
+{% endif %}
+{% endfor %}
+   }
+}
+resource "local_file" "inventory" {
+   content     = "${data.template_file.inventory.rendered}"
+   filename = "${path.module}/inventory.yml"
+}

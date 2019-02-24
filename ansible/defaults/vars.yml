@@ -29,9 +29,7 @@ rootpw_hash: $6$xtq2rINRUwpoUaZx$Gstm2Pv5Jn9KIKxsIeRg/a2kpIb7Kul2NvkhxOQEiSxaPri
 packer_cache_dir: "{{ download_cache_dir }}"
 
 # Terraform vars
-network_cidr: 172.32.1.0/24
 volume_pool: images
-network_mode: nat
 packer_image: ../packer/build/dev
 # To use predefined key, uncomment below and paste b64 encoded public key
 # ssh_public_key: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCQVFESU1wRmpGY2RaVzl5ZkZNR2QxRDExOXcvblgrWlJNUGlrVlg1Q3ZLTVdvODR0WGYzSXFuQXRHdkRUWWpQS20wVHdoWHlORk1iTGNGQWNYMnM5ZTZwa3NVYllHQkFEa2ppVTFVd2Y2MmdBOUgvK3A3Mm8vYTVYRmdxekRqb2Z0RW5IdVIwbmNJRGFNV1BORWdDMmk5MnpvZ01DUm5iN1I0RHovYlR5cXZnUUtSbU1FTFlHS3NpQ1Z1Q3hKNjN1NzJlL0dUTGdYb1o5RExMWDhUMEYvWW5EdWw1WXFjNU94SVQ5Wm54ZE9LRVdDY2dLU083ZGdLbFZlNi9ibkpKNHpyMjNJTXZJRjRERi9CYm1xQnpnc1luM1lqYWR0NHFFVTBUalVINnUzcnhyekRrR1M2Wnc5TDF0R1NXam52TjVNMzdsd2dPZ0hIRFppMXhVZ0thOFoyVGYgdGVycmFrdm1AcHduYm94
@@ -44,7 +42,6 @@ ssh_fullname: developer
 ssh_pass_hash: "{{ rootpw_hash }}"
 # apt_proxy: false
 # apt_chache_url: proxy-url
-dhcp_enabled: true
 
 # VM configuration
 vms:
@@ -55,6 +52,11 @@ vms:
     arch: "{{ arch }}"
     ncpu: "{{ ncpu }}"
     memory: "{{ memory }}"
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
 #  - hostname: dev-client
 #    vm_name: dev-client
 #    from_iso: false
