@@ -46,6 +46,7 @@ EOF
 }
 
 {% for disk in vm.disks %}
+{% if disk.type is undefined or disk.type == "primary" %}
 {% if disk.grow is defined and disk.grow %}
 resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}_base" {
   name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}_base")}"
@@ -63,6 +64,13 @@ resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
   source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
 {% endif %}
 }
+{% else %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
+  name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}")}"
+  pool = "${var.volume_pool}"
+  size = "{{ disk.size }}"
+}
+{% endif %}
 {% endfor %}
 
 resource "libvirt_domain" "{{ vm.vm_name }}" {
