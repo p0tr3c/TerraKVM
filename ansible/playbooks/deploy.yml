@@ -97,6 +97,12 @@
       tags:
         - deploy
         - terraform
+    - name: Create ssh config
+      template:
+        src: "{{ template_dir }}/ssh/config"
+        dest: "{{ repo_dir }}/{{ project_name }}.config"
+        mode: 0600
+      with_dict: "{{ terraform_output.outputs }}"
     - name: Add host for provisioning
       add_host:
         name: "{{ item.key }}"
@@ -105,10 +111,14 @@
         ansible_ssh_host: "{{ item.value.value.public_ip }}"
         ansible_ssh_private_key_file: "{{ terraform_dir }}/{{ project_name}}.pkey"
       with_dict: "{{ terraform_output.outputs }}"
+      tags:
+        - provisioning
     - name: Include global provisioning
       include_tasks:
         file: "{{ provisioning_tasks }}"
       when: provisioning_tasks is defined
+      tags:
+        - provisioning
     - name: Include per-host provisioning
       include_tasks:
         file: "{{ delegation.provisioning_playbook }}"
@@ -116,12 +126,8 @@
       loop_control:
         loop_var: delegation
       when: delegation.provisioning_playbook is defined
-    - name: Create ssh config
-      template:
-        src: "{{ template_dir }}/ssh/config"
-        dest: "{{ repo_dir }}/{{ project_name }}.config"
-        mode: 0600
-      with_dict: "{{ terraform_output.outputs }}"
+      tags:
+        - provisioning
     - name: Connection information
       debug:
         msg: [
