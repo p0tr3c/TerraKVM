@@ -57,15 +57,6 @@ vms:
     networks:
       - network_name: default
         external: true
-#  - hostname: dev-client
-#    vm_name: dev-client
-#    from_iso: false
-#    distro: centos
-#    arch: amd64
-#    ncpu: 4
-#    memory: 2048
-#    network_name: default
-#    address: 172.33.1.254
 #    cloud_init_config: |
 #      yum_repos:
 #          epel:

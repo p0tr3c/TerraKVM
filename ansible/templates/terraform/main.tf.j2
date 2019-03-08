@@ -45,7 +45,7 @@ EOF
   pool       = "${var.volume_pool}"
 }
 
-{% for disk in vm.disks %}
+{% for disk in vm.disks if (disk.type is undefined or (disk.type is defined and disk.type != "iso")) %}
 {% if disk.type is undefined or disk.type == "primary" %}
 {% if disk.grow is defined and disk.grow %}
 resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}_base" {
@@ -77,7 +77,9 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
   name = "${var.{{ vm.vm_name }}_vm_name}"
   vcpu = "${var.{{ vm.vm_name }}_ncpu}"
   memory = "${var.{{ vm.vm_name }}_memory}"
+{% if vm.manual is undefined or not vm.manual %}
   cloudinit = "${libvirt_cloudinit_disk.{{ vm.vm_name }}.id}"
+{% endif %}
   # Provide hostname, and address via cloudinit, as in generic image
 {% for net in vm.networks %}
   network_interface {
@@ -101,14 +103,24 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
 {% endfor %}
   disk = [
 {% for disk in vm.disks %}
+{% if disk.type is defined and disk.type == "iso" %}
+    {
+      file = "{{ disk.file_path }}"
+    },
+{% else %}
+
     {
       volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}.id}"
     }{% if not loop.last -%},{%- endif %}
-
+{% endif %}
 {% endfor %}
   ]
   boot_device {
+{% if vm.manual is defined and vm.manual %}
+    dev = ["cdrom", "hd", "network"]
+{% else %}
     dev = ["hd", "network"]
+{% endif %}
   }
 {% if vm.distro == 'ubuntu' and not from_iso %}
 {% raw %}
