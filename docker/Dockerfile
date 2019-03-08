@@ -44,7 +44,18 @@ RUN apt-get update -q && \
     qemu-kvm \
     libguestfs-tools \
     xsltproc \
+    pkg-config \
+    libvirt-dev \
      -y && \
+    apt-get clean && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add guestfs to the image
+RUN apt-get update -q && \
+    apt-get install \
+    libguestfs-tools \
+    -y --no-install-recommends && \
     apt-get clean && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/*
@@ -113,7 +124,7 @@ RUN wget https://github.com/dmacvicar/terraform-provider-libvirt/releases/downlo
     mkdir -p /home/$USER_NAME/.terraform.d/plugins && \
     mkdir -p /root/.terraform.d/plugins && \
     cp terraform-provider-libvirt /home/$USER_NAME/.terraform.d/plugins/ && \
-    cp terraform-provider-libvirt /root/.terraform.d/plugins/ && \ 
+    cp terraform-provider-libvirt /root/.terraform.d/plugins/ && \
     chown $USER_NAME:$USER_NAME -R /home/$USER_NAME/ &&  \
     chmod 0755 /home/$USER_NAME/.terraform.d/plugins/terraform-provider-libvirt && \
     rm -rf /tmp/build/*
