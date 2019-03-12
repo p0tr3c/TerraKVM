@@ -154,13 +154,13 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
     xslt = "${file("ubuntu_bug-1573095.xsl")}"
   }
 {% endraw %}
+{% endif %}
 {% if vm.enable_console is defined and vm.enabled_console %}
     console {
         type = "pty"
         target_port = "0"
         target_type = "serial"
     }
-{% endif %}
 {% endif %}
 }
 {% endfor %}
