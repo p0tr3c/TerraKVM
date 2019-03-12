@@ -155,7 +155,7 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
   }
 {% endraw %}
 {% endif %}
-{% if vm.enable_console is defined and vm.enabled_console %}
+{% if vm.enable_console is defined and vm.enable_console %}
     console {
         type = "pty"
         target_port = "0"
