@@ -43,6 +43,32 @@ resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
   meta_data  = <<EOF
     local-hostname: ${var.{{ vm.vm_name }}_vm_name}
 EOF
+{% if cloudinit_net_config %}
+  network_config = <<EOF
+version: 1
+config:
+{% for net in vm.networks %}
+{% if net.cloudinit is defined and net.cloudinit %}
+  - type: physical
+    name: {{ net.interface }}
+{% if net.mac_address is defined %}
+    mac_address: "{{ net.mac_address }}"
+{% endif %}
+    subnets:
+      - type: {{ net.type | default('dhcp') }}
+{% if net.type == "static" %}
+        address: {{ net.address }}
+{% if net.netmask is defined %}
+        netmask: {{ net.netmask }}
+{% endif %}
+{% if net.gateway is defined %}
+        gateway: {{ net.gateway }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+EOF
+{% endif %}
   pool       = "${var.volume_pool}"
 }
 
@@ -99,7 +125,6 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
     network_name = "${var.{{ vm.vm_name }}_{{ net.network_name }}}"
     {% else %}
     network_id = "${libvirt_network.{{ net.network_name}}.id}"
-    {% endif %}
     {% if net.address is not defined %}
     wait_for_lease = true
     {% else %}
@@ -107,6 +132,7 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
     addresses = ["${var.{{ vm.vm_name }}_{{ net.network_name }}_address}"]
     {% endif %}
     hostname = "${var.{{ vm.vm_name }}_hostname}"
+    {% endif %}
   {% endif %}
   }
 {% endfor %}
@@ -138,6 +164,13 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
     xslt = "${file("ubuntu_bug-1573095.xsl")}"
   }
 {% endraw %}
+{% endif %}
+{% if vm.enable_console is defined and vm.enable_console %}
+    console {
+        type = "pty"
+        target_port = "0"
+        target_type = "serial"
+    }
 {% endif %}
 }
 {% endfor %}
