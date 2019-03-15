@@ -37,6 +37,7 @@ EOF
 }
 
 resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
+  pool       = "${var.volume_pool}"
   name       = "{{ vm.vm_name }}_cloudinit.iso"
   user_data  = "${data.template_file.{{ vm.vm_name }}_user_data.rendered}"
   meta_data  = <<EOF
@@ -46,6 +47,13 @@ EOF
 }
 
 {% for disk in vm.disks if (disk.type is undefined or (disk.type is defined and disk.type != "iso")) %}
+{% if disk.empty is defined and disk.empty %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
+  name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}")}"
+  pool = "${var.volume_pool}"
+  size = "{{ disk.size }}"
+}
+{% else %}
 {% if disk.type is undefined or disk.type == "primary" %}
 {% if disk.grow is defined and disk.grow %}
 resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}_base" {
@@ -70,6 +78,7 @@ resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
   pool = "${var.volume_pool}"
   size = "{{ disk.size }}"
 }
+{% endif %}
 {% endif %}
 {% endfor %}
 
@@ -111,13 +120,14 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
 
     {
       volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}.id}"
+#      scsi = "true"
     }{% if not loop.last -%},{%- endif %}
 {% endif %}
 {% endfor %}
   ]
   boot_device {
 {% if vm.manual is defined and vm.manual %}
-    dev = ["cdrom", "hd", "network"]
+    dev = ["hd", "cdrom", "network"]
 {% else %}
     dev = ["hd", "network"]
 {% endif %}
