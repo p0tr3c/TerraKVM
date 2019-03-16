@@ -1,0 +1,22 @@
+project_name: example_cloud_init_networking
+volume_pool: default
+cloudinit_net_config: true
+vms:
+  - hostname: cloudinti_network
+    vm_name: cloudinit_network
+    from_iso: false
+    arch: amd64
+    ncpu: 1
+    memory: 512
+    distro: centos
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
+        cloudinit: true
+        interface: eth0
+        type: static
+        address: 192.168.122.44
+        netmask: 255.255.255.0
+        gateway: 192.168.122.1
