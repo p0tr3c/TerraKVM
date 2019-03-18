@@ -21,6 +21,8 @@
         path: "{{ terraform_dir }}"
         state: directory
         mode: 0700
+      tags:
+        - always
     - name: Create SSH key
       block:
         - command: ssh-keygen -f "{{ terraform_dir }}/{{ project_name}}.pkey" -N ""
