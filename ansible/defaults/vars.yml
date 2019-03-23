@@ -94,7 +94,12 @@ cloud_images:
   - url: https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/29/Cloud/x86_64/images/Fedora-Cloud-Base-29-1.2.x86_64.qcow2
     iso_name: Fedora-Cloud-Base-29-1.2.x86_64.qcow2
     checksum: sha256:a30549d620bf6bf41d30a9a58626e59dfa70bb011fd7d50f6c4511ad2e479a39
-    distro: fedora
+    distro: fedora29
+    arch: amd64
+  - url: https://dl.fedoraproject.org/pub/fedora/linux/releases/28/Cloud/x86_64/images/Fedora-Cloud-Base-28-1.1.x86_64.qcow2
+    iso_name: Fedora-Cloud-Base-28-1.1.x86_64.qcow2
+    checksum: sha256:d987209719fadaf81b8bff85c5d3590a1d3dac6357e4838fde8357086c49b5b4
+    distro: fedora28
     arch: amd64
   - url: https://cloud-images.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-cloudimg-amd64.img
     iso_name: bionic-server-cloudimg-amd64.img
