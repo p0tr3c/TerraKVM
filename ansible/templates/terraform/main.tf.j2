@@ -40,6 +40,7 @@ EOF
 }
 
 resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
+    pool   = "${var.volume_pool}"
     name       = "{{ vm.vm_name }}_cloudinit.iso"
     user_data  = "${data.template_file.{{ vm.vm_name }}_user_data.rendered}"
     meta_data  = <<EOF
