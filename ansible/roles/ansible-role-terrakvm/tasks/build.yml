@@ -1,0 +1,11 @@
+- name: Template packer instructions
+  template:
+    src: packer/{{ item.name }}.j2"
+    dest: "{{ packer_dir }}/{{ item.name }}"
+  when: build_image or (from_iso and distro in item.distro)
+  with_items:
+    - { name: "template.json", distro: ["centos", "ubuntu"] }
+    - { name: "kickstart.ks", distro: ["centos"] }
+    - { name: "variables.json", distro: ["centos", "ubuntu"] }
+    - { name: "99-cloudinit.cfg", distro: ["centos", "ubuntu"] }
+    - { name: "preseed", distro: ["ubuntu"] }

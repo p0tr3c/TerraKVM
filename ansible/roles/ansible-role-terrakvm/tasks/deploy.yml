@@ -31,7 +31,7 @@
 
 - name: Template terraform instructions
   template:
-    src: "{{ item.name }}.j2"
+    src: "terraform/{{ item.name }}.j2"
     dest: "{{ terraform_dir }}/{{ item.name }}"
   with_items:
     - { name: "main.tf" }
@@ -56,7 +56,7 @@
 
 - name: Create ssh config
   template:
-    src: ssh_config
+    src: terraform/ssh_config
     dest: "{{ repo_dir }}/{{ project_name }}.config"
     mode: 0600
   with_dict: "{{ terraform_output.outputs }}"
