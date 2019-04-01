@@ -36,9 +36,9 @@
         - ssh
     - name: Template packer instructions
       template:
-        src: "{{ packer_dir }}/{{ item.name }}.j2"
+        src: "{{ template_dir }}/packer/{{ item.name }}.j2"
         dest: "{{ packer_dir }}/{{ item.name }}"
-      when: from_iso and distro in item.distro
+      when: build_image or (from_iso and distro in item.distro)
       with_items:
         - { name: "template.json", distro: ["centos", "ubuntu"] }
         - { name: "kickstart.ks", distro: ["centos"] }
@@ -84,7 +84,7 @@
       tags:
         - build
         - packer
-      when: from_iso
+      when: build_image or from_iso
     - name: Destroy current infrastructure
       terraform:
         project_path: "{{ terraform_dir }}"

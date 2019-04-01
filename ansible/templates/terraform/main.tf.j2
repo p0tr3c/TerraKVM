@@ -107,6 +107,9 @@ resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
 resource "libvirt_domain" "{{ vm.vm_name }}" {
     name = "${var.{{ vm.vm_name }}_vm_name}"
     vcpu = "${var.{{ vm.vm_name }}_ncpu}"
+    cpu {
+        mode = "host-passthrough"
+    }
     memory = "${var.{{ vm.vm_name }}_memory}"
     {% if vm.manual is undefined or not vm.manual %}
     cloudinit = "${libvirt_cloudinit_disk.{{ vm.vm_name }}.id}"

@@ -134,3 +134,7 @@ cloud_images:
 # json queries
 terraform_iso_filter: "[?distro=='{{ distro }}' && arch=='{{ arch }}'].iso_name"
 download_filter: "[?distro=='{{ item.distro }}' && arch=='{{ item.arch }}']"
+
+# Packer variables
+build_image: false
+build_from_qcow: false
