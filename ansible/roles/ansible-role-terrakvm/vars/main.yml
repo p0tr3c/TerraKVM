@@ -1,0 +1,2 @@
+terraform_iso_filter: "[?distro=='{{ distro }}' && arch=='{{ arch }}'].iso_name"
+download_filter: "[?distro=='{{ item.distro }}' && arch=='{{ item.arch }}']"

@@ -1,0 +1,110 @@
+# Default vm settings
+cleanup: false
+force_rebuild: false
+distro: centos
+arch: amd64
+project_name: dev
+vm_name: "{{ project_name }}"
+hostname: "{{ vm_name }}"
+ncpu: 4
+memory: 2048
+#network_name: default
+cloudinit_net_config: false
+# Repo folder locations
+repo_dir: "{{ (playbook_dir + '/../../') | realpath }}"
+packer_dir: "{{ (repo_dir + '/packer') | realpath }}"
+terraform_dir: "{{ (repo_dir + '/terraform/' + project_name ) | realpath }}"
+download_cache_dir: "{{ (repo_dir + '/.download_cache') | realpath }}"
+template_dir: "{{ (repo_dir + '/templates') | realpath }}"
+
+# Build vars
+mirror_address: http://mirrorlist.centos.org/
+lang: en
+keyboard: uk
+timezone: Europe/London
+rootpw_hash: $6$xtq2rINRUwpoUaZx$Gstm2Pv5Jn9KIKxsIeRg/a2kpIb7Kul2NvkhxOQEiSxaPribXZzWd9sDtDbdeEtoPlF8zZ6NrKYMrXEcN85cg/
+packer_cache_dir: "{{ download_cache_dir }}"
+
+# Terraform vars
+volume_pool: default
+packer_image: ../packer/build/dev
+# To use predefined key, uncomment below and paste b64 encoded public key
+# ssh_public_key: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCQVFESU1wRmpGY2RaVzl5ZkZNR2QxRDExOXcvblgrWlJNUGlrVlg1Q3ZLTVdvODR0WGYzSXFuQXRHdkRUWWpQS20wVHdoWHlORk1iTGNGQWNYMnM5ZTZwa3NVYllHQkFEa2ppVTFVd2Y2MmdBOUgvK3A3Mm8vYTVYRmdxekRqb2Z0RW5IdVIwbmNJRGFNV1BORWdDMmk5MnpvZ01DUm5iN1I0RHovYlR5cXZnUUtSbU1FTFlHS3NpQ1Z1Q3hKNjN1NzJlL0dUTGdYb1o5RExMWDhUMEYvWW5EdWw1WXFjNU94SVQ5Wm54ZE9LRVdDY2dLU083ZGdLbFZlNi9ibkpKNHpyMjNJTXZJRjRERi9CYm1xQnpnc1luM1lqYWR0NHFFVTBUalVINnUzcnhyekRrR1M2Wnc5TDF0R1NXam52TjVNMzdsd2dPZ0hIRFppMXhVZ0thOFoyVGYgdGVycmFrdm1AcHduYm94
+# Ubuntu
+language: en
+country: CA
+locale: en_CA.UTF-8
+ssh_username: dev
+ssh_fullname: developer
+ssh_pass_hash: "{{ rootpw_hash }}"
+# apt_proxy: false
+# apt_chache_url: proxy-url
+
+# VM configuration
+vms:
+  - hostname: "{{ hostname }}"
+    vm_name: "{{ vm_name }}"
+    from_iso: "{{ from_iso }}"
+    distro: "{{ distro }}"
+    arch: "{{ arch }}"
+    ncpu: "{{ ncpu }}"
+    memory: "{{ memory }}"
+    disks:
+      - name: root
+        grow: true
+        size: 21474836480
+    networks:
+      - network_name: default
+        external: true
+
+cloud_images:
+  - url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2
+    iso_name: CentOS-7-x86_64-GenericCloud-1901.qcow2
+    checksum: sha256:76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333
+    distro: centos
+    arch: amd64
+  - url: https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/29/Cloud/x86_64/images/Fedora-Cloud-Base-29-1.2.x86_64.qcow2
+    iso_name: Fedora-Cloud-Base-29-1.2.x86_64.qcow2
+    checksum: sha256:a30549d620bf6bf41d30a9a58626e59dfa70bb011fd7d50f6c4511ad2e479a39
+    distro: fedora29
+    arch: amd64
+  - url: https://dl.fedoraproject.org/pub/fedora/linux/releases/28/Cloud/x86_64/images/Fedora-Cloud-Base-28-1.1.x86_64.qcow2
+    iso_name: Fedora-Cloud-Base-28-1.1.x86_64.qcow2
+    checksum: sha256:d987209719fadaf81b8bff85c5d3590a1d3dac6357e4838fde8357086c49b5b4
+    distro: fedora28
+    arch: amd64
+  - url: https://cloud-images.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-cloudimg-amd64.img
+    iso_name: bionic-server-cloudimg-amd64.img
+    checksum: sha256:6f18b85cd1f5f8a46d3c07fef61b4075d50cb0b9e16471d554375075b7d3f574
+    distro: ubuntu
+    arch: amd64
+  - url: https://cloud-images.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-cloudimg-i386.img
+    iso_name: bionic-server-cloudimg-i386.img
+    checksum: sha256:50e58c2bab851a404fc04575a1ccb1c2856ad10d269243622658b01216a4b8c2
+    distro: ubuntu
+    arch: "x86"
+  - url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
+    iso_name: ubuntu-16.04-server-cloudimg-amd64-disk1.img
+    checksum: sha256:2d4366c9f7512c731fa1c9a5a431ec98a2bc50c4bd31e1e85777f1cbbbe0f412
+    distro: ubuntu16
+    arch: amd64
+  - url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-i386-disk1.img
+    iso_name: ubuntu-16.04-server-cloudimg-i386-disk1.img
+    checksum: sha256:9d1be474c30bfbbde490c9eadd0eb9481de33923fa34bcceea97a2d7a54bba75
+    distro: ubuntu16
+    arch: "x86"
+  - url: https://cdimage.debian.org/cdimage/openstack/current/debian-9.7.0-openstack-amd64.qcow2
+    iso_name: debian-9.7.0-openstack-amd64.qcow2
+    checksum: sha256:3b789864962561c54ed4ebc4abd261470fecfe99c8e8e3ae242a72c03bf5a82f
+    distro: debian
+    arch: amd64
+  - url: http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/x86_64/alpine-virt-3.9.0-x86_64.iso
+    iso_name: alpine-virt-3.9.0-x86_64.iso
+    checksum: sha256:e87e0256d10ca2125455fb5023687b2346740a8cbae54972312fe1626f07494c
+    distro: alpine
+    arch: amd64
+
+# Packer variables
+build_image: false
+build_from_qcow: false
+from_iso: false

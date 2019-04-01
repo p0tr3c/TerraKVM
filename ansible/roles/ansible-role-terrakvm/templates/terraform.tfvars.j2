@@ -1,0 +1,17 @@
+{% if networks is defined %}
+{% for net in networks %}
+{{ net.network_name }} = "{{ net.network_name }}"
+{{ net.network_name }}_mode =  "{{ net.network_mode }}"
+{{ net.network_name }}_dhcp = "{{ net.dhcp_enabled }}"
+{{ net.network_name }}_cidr =  "{{ net.network_cidr }}"
+{% endfor %}
+{% endif %}
+ssh_username = "{{ ssh_username }}"
+ssh_public_key = "{{ ssh_public_key | b64decode }}"
+ssh_private_key_file = "./{{ project_name }}.pkey"
+{% if not from_iso %}
+packer_image = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_iso_filter) | join('')}}"
+{% else %}
+packer_image =  "{{ packer_image | default('../packer/build/dev') }}"
+{% endif %}
+volume_pool =  "{{ volume_pool | default('default') }}"

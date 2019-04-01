@@ -1,37 +1,10 @@
 - hosts: localhost
   connection: local
   gather_facts: false
-  vars_files:
-    - "{{ playbook_dir }}/../defaults/vars.yml"
+  debugger: on_failed
   tasks:
-    - name: Check if terraform exists
-      stat:
-        path: "{{ terraform_dir }}/main.tf"
-      register: terraform_state
-    - name: Destroy terraform deployment
-      terraform:
-        project_path: "{{ terraform_dir }}"
-        state: absent
-      when: terraform_state.stat.exists
-    - name: Remove build image
-      file:
-        path: "{{ packer_dir }}/build/{{ vm_name }}"
-        state: absent
-      when: cleanup
-    - name: Find all templated files
-      find:
-        paths:
-          - "{{ packer_dir }}"
-          - "{{ terraform_dir }}"
-        patterns: "*"
-        hidden: true
-        excludes: ".gitignore"
-        file_type: any
-      register: templated_files
-      when: cleanup
-    - name: Remove templated files
-      file:
-        path: "{{ item.path }}"
-        state: absent
-      with_items: "{{ templated_files.files}}"
-      when: cleanup
+    - name: Destroy VM(s)
+      include_role:
+        name: ansible-role-terrakvm
+      vars:
+        action: destroy

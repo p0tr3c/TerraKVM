@@ -1,0 +1,7 @@
+- name: Deploy VM(s)
+  include_tasks: deploy.yml
+  when: action == "deploy"
+
+- name: Destroy VM(s)
+  include_tasks: destroy.yml
+  when: action == "destroy"

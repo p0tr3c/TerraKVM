@@ -1,0 +1,7 @@
+{% for key, value in terraform_output.outputs.items() %}
+Host {{ key }}
+    HostName {{ value.value.public_ip }}
+    User {{ value.value.ssh_username }}
+    IdentityFile ./terraform/{{ project_name }}/{{ project_name }}.pkey
+    StrictHostKeyChecking no
+{% endfor %}

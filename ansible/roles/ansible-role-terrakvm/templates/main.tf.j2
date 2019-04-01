@@ -1,0 +1,194 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+provider "libvirt" {
+    uri = "qemu:///system"
+}
+
+{%- if networks is defined %}
+    {% for net in networks %}
+resource "libvirt_network" "{{ net.network_name }}" {
+    name = "${var.{{ net.network_name }}}"
+    mode = "${var.{{ net.network_name }}_mode}"
+    addresses = ["${var.{{ net.network_name }}_cidr}"]
+    dhcp {
+        enabled = "${var.{{ net.network_name }}_dhcp}"
+    }
+}
+    {% endfor %}
+{% else -%}
+{% endif %}
+
+{% for vm in vms %}
+    {% if vm.manual is undefined or not vm.manual %}
+data "template_file" "{{ vm.vm_name }}_user_data" {
+    template = <<EOF
+#cloud-config
+users:
+  - name: $${ssh_user}
+    lock-passwd: true
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - $${ssh_public_key}
+        {% if vm.cloud_init_config is defined %}
+{{ vm.cloud_init_config }}
+        {% endif %}
+EOF
+    vars {
+        ssh_user = "${var.ssh_username}"
+        ssh_public_key = "${var.ssh_public_key}"
+    }
+}
+
+resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
+    pool   = "${var.volume_pool}"
+    name       = "{{ vm.vm_name }}_cloudinit.iso"
+    user_data  = "${data.template_file.{{ vm.vm_name }}_user_data.rendered}"
+    meta_data  = <<EOF
+local-hostname: ${var.{{ vm.vm_name }}_vm_name}
+EOF
+        {% if cloudinit_net_config %}
+    network_config = <<EOF
+version: 1
+config:
+            {% for net in vm.networks %}
+                {% if net.cloudinit is defined and net.cloudinit %}
+  - type: physical
+    name: {{ net.interface }}
+                    {% if net.mac_address is defined %}
+    mac_address: "{{ net.mac_address }}"
+                    {% endif %}
+    subnets:
+      - type: {{ net.type | default('dhcp') }}
+                    {% if net.type == "static" %}
+        address: {{ net.address }}
+                        {% if net.netmask is defined %}
+        netmask: {{ net.netmask }}
+                        {% endif %}
+                        {% if net.gateway is defined %}
+        gateway: {{ net.gateway }}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+EOF
+        {% endif %}
+    pool       = "${var.volume_pool}"
+}
+    {% endif %}
+
+    {% for disk in vm.disks if (disk.type is undefined or (disk.type is defined and disk.type != "iso")) %}
+        {% if disk.type is undefined or disk.type == "primary" %}
+            {% if disk.grow is defined and disk.grow %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}_base" {
+    name   = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}_base")}"
+    pool   = "${var.volume_pool}"
+    source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
+}
+            {% endif %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
+    name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}")}"
+    pool = "${var.volume_pool}"
+            {% if disk.grow is defined and disk.grow %}
+    base_volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}_base.id}"
+    size = "{{ disk.size }}"
+            {% else %}
+    source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
+            {% endif %}
+}
+        {% else %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
+    name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}")}"
+    pool = "${var.volume_pool}"
+    size = "{{ disk.size }}"
+}
+        {% endif %}
+    {% endfor %}
+
+resource "libvirt_domain" "{{ vm.vm_name }}" {
+    name = "${var.{{ vm.vm_name }}_vm_name}"
+    vcpu = "${var.{{ vm.vm_name }}_ncpu}"
+    cpu {
+        mode = "host-passthrough"
+    }
+    memory = "${var.{{ vm.vm_name }}_memory}"
+    {% if vm.manual is undefined or not vm.manual %}
+    cloudinit = "${libvirt_cloudinit_disk.{{ vm.vm_name }}.id}"
+    {% endif %}
+    # Provide hostname, and address via cloudinit, as in generic image
+    {% for net in vm.networks %}
+    network_interface {
+        {% if net.bridge is defined %}
+        bridge = "{{ net.bridge }}"
+        {% else %}
+            {% if net.external is defined and net.external %}
+        network_name = "${var.{{ vm.vm_name }}_{{ net.network_name }}}"
+            {% else %}
+        network_id = "${libvirt_network.{{ net.network_name}}.id}"
+            {% endif %}
+            {% if net.address is not defined or net.type == "dhcp" %}
+        wait_for_lease = true
+                {% else %}
+        wait_for_lease = false
+        addresses = ["${var.{{ vm.vm_name }}_{{ net.network_name }}_address}"]
+                {% endif %}
+        hostname = "${var.{{ vm.vm_name }}_hostname}"
+            {% endif %}
+    }
+    {% endfor %}
+    disk = [
+    {% for disk in vm.disks %}
+        {%- if disk.type is defined and disk.type == "iso" %}
+        {
+            file = "{{ disk.file_path }}"
+        }
+        {%- else %}
+        {
+          volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}.id}"
+        }
+        {% endif %}
+        {% if not loop.last %},
+        {% endif %}
+    {% endfor %}
+    ]
+    boot_device {
+    {% if vm.manual is defined and vm.manual %}
+        dev = ["hd", "cdrom", "network"]
+    {% else %}
+        dev = ["hd", "network"]
+    {% endif %}
+    }
+    {% if vm.distro == 'ubuntu' and not from_iso %}
+        {% raw %}
+    xml {
+        xslt = "${file("ubuntu_bug-1573095.xsl")}"
+    }
+        {% endraw %}
+    {% endif %}
+    {% if vm.enable_console is defined and vm.enable_console %}
+    console {
+        type = "pty"
+        target_port = "0"
+        target_type = "serial"
+    }
+    {% endif %}
+}
+{% endfor %}
+
+data "template_file" "inventory" {
+    template = "${file("inventory.tpl")}"
+    vars {
+        ssh_user = "${var.ssh_username}"
+        pkey_file_path = "${var.ssh_private_key_file}"
+{% for vm in vms %}
+    {% if vm.networks.0.address is defined %}
+        {{ vm.vm_name }}_address = "${var.{{ vm.vm_name }}_{{ vm.networks.0.network_name }}_address}"
+    {% else %}
+        {{ vm.vm_name }}_address = "${libvirt_domain.{{ vm.vm_name }}.network_interface.0.addresses.0}"
+    {% endif %}
+{% endfor %}
+    }
+}
+resource "local_file" "inventory" {
+    content     = "${data.template_file.inventory.rendered}"
+    filename = "${path.module}/inventory.yml"
+}
