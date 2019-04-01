@@ -9,3 +9,9 @@
     - { name: "variables.json", distro: ["centos", "ubuntu"] }
     - { name: "99-cloudinit.cfg", distro: ["centos", "ubuntu"] }
     - { name: "preseed", distro: ["ubuntu"] }
+
+- name: Execute build
+  command: packer build -var-file=variables.json template.json
+  args:
+    chdir: "{{ packer_dir }}"
+    creates: "{{ packer_dir }}/build/{{ vm_name }}"
