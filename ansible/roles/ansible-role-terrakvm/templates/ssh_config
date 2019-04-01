@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% for key, value in terraform_output.outputs.items() %}
 Host {{ key }}
     HostName {{ value.value.public_ip }}

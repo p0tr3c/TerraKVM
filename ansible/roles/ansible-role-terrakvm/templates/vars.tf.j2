@@ -1,40 +1,44 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
-{% for net in networks %}
+    {% for net in networks %}
 variable "{{ net.network_name }}" {type = "string"}
 variable "{{ net.network_name }}_mode" {type = "string"}
 variable "{{ net.network_name }}_dhcp" {type = "string"}
 variable "{{ net.network_name }}_cidr" {type = "string"}
-{% endfor %}
+    {% endfor %}
 {% endif %}
 variable "disk_id" {type="string", default = ""}
-variable "volume_pool" {type = "string", default = "default"}
-variable "cloudinit_iso" {type = "string", default = "cloudinit.iso"}
-variable "ssh_username" {type = "string", default = "dev"}
+variable "volume_pool" {type = "string"}
+variable "cloudinit_iso" {type = "string"}
+variable "ssh_username" {type = "string"}
 variable "ssh_public_key" {type = "string"}
 variable "ssh_private_key_file" {type = "string"}
 {% for vm in vms %}
-{% for disk in vm.disks %}
-{% if disk.source_image is defined %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_source" {"type" = "string", default = "{{ disk.source_image }}"}
-{% else %}
-{% if not vm.from_iso %}
-{% set terraform_loop_iso_filter = "[?distro=='"+ vm.distro +"' && arch=='" + vm.arch +"'].iso_name" %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_source" {type = "string", default = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_loop_iso_filter) | join('')}}"}
-{% else %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_source" {type = "string", default = "{{ packer_image }}"}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% for vm_net in vm.networks %}
-    {% if vm_net.bridge is not defined %}
-variable "{{ vm.vm_name }}_{{ vm_net.network_name }}" {type = "string", default = "{{ vm_net.network_name }}"}
-{% if vm_net.address is defined %}
-variable "{{ vm.vm_name }}_{{ vm_net.network_name }}_address" {type = "string", default = "{{ vm_net.address }}"}
-    {% endif %}
-{% endif %}
-{% endfor %}
-variable "{{ vm.vm_name }}_hostname" {type = "string", default = "{{ vm.hostname }}"}
-variable "{{ vm.vm_name }}_ncpu" {type = "string", default = "{{ vm.ncpu }}"}
-variable "{{ vm.vm_name }}_memory" {type = "string", default = "{{ vm.memory }}"}
-variable "{{ vm.vm_name }}_vm_name" {type = "string", default = "{{ vm.vm_name }}"}
+    {% for disk in vm.disks %}
+        {% if disk.size is defined %}
+variable "{{ vm.vm_name }}_{{ disk.name }}_size" {"type" = "string"}
+        {% endif %}
+        {% if disk.type is defined and disk.type == "iso" %}
+variable "{{ vm.vm_name }}_{{ disk.name }}_path" {"type" = "string"}
+        {% endif %}
+        {% if disk.source_image is defined %}
+variable "{{ vm.vm_name }}_{{ disk.name }}_source" {"type" = "string"}
+        {% else %}
+            {% if not vm.from_iso %}
+variable "{{ vm.vm_name }}_{{ disk.name }}_source" {type = "string"}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% for vm_net in vm.networks %}
+        {% if vm_net.bridge is not defined %}
+variable "{{ vm.vm_name }}_{{ vm_net.network_name }}" {type = "string"}
+            {% if vm_net.address is defined %}
+variable "{{ vm.vm_name }}_{{ vm_net.network_name }}_address" {type = "string"}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+variable "{{ vm.vm_name }}_hostname" {type = "string" }
+variable "{{ vm.vm_name }}_ncpu" {type = "string"}
+variable "{{ vm.vm_name }}_memory" {type = "string"}
+variable "{{ vm.vm_name }}_vm_name" {type = "string"}
 {% endfor %}

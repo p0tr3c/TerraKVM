@@ -1,10 +1,11 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
-{% for net in networks %}
+    {% for net in networks %}
 {{ net.network_name }} = "{{ net.network_name }}"
 {{ net.network_name }}_mode =  "{{ net.network_mode }}"
 {{ net.network_name }}_dhcp = "{{ net.dhcp_enabled }}"
 {{ net.network_name }}_cidr =  "{{ net.network_cidr }}"
-{% endfor %}
+    {% endfor %}
 {% endif %}
 ssh_username = "{{ ssh_username }}"
 ssh_public_key = "{{ ssh_public_key | b64decode }}"
@@ -15,3 +16,35 @@ packer_image = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_
 packer_image =  "{{ packer_image | default('../packer/build/dev') }}"
 {% endif %}
 volume_pool =  "{{ volume_pool | default('default') }}"
+cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
+
+{% for vm in vms %}
+    {% for disk in vm.disks %}
+        {% if disk.size is defined %}
+{{ vm.vm_name }}_{{ disk.name }}_size = "{{ disk.size }}"
+        {% endif %}
+        {% if disk.type is defined and disk.type == "iso" %}
+{{ vm.vm_name }}_{{ disk.name }}_path = "{{ disk.path }}"
+        {% endif %}
+        {% if disk.source_image is defined %}
+{{ vm.vm_name }}_{{ disk.name }}_source = "{{ disk.source_image }}"
+        {% else %}
+            {% if not vm.from_iso %}
+                {% set terraform_loop_iso_filter = "[?distro=='"+ vm.distro +"' && arch=='" + vm.arch +"'].iso_name" %}
+{{ vm.vm_name }}_{{ disk.name }}_source = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_loop_iso_filter) | join('')}}"
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% for vm_net in vm.networks %}
+        {% if vm_net.bridge is not defined %}
+{{ vm.vm_name }}_{{ vm_net.network_name }} = "{{ vm_net.network_name }}"
+            {% if vm_net.address is defined %}
+{{ vm.vm_name }}_{{ vm_net.netowrk_name }}_address = "{{ vm_net.address }}"
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{{ vm.vm_name }}_hostname = "{{ vm.hostname }}"
+{{ vm.vm_name }}_ncpu = "{{ vm.ncpu }}"
+{{ vm.vm_name }}_memory = "{{ vm.memory }}"
+{{ vm.vm_name }}_vm_name = "{{ vm.vm_name }}"
+{% endfor %}

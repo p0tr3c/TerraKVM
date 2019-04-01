@@ -1,11 +1,12 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% for vm in vms %}
 output "{{ vm.vm_name }}" { value = "${
     map(
-{% if vm.networks.0.address is defined %}
+    {% if vm.networks.0.address is defined %}
       "public_ip", "${var.{{ vm.vm_name }}_{{ vm.networks.0.network_name }}_address}",
-{% else %}
+    {% else %}
       "public_ip", "${libvirt_domain.{{ vm.vm_name }}.network_interface.0.addresses.0}",
-{% endif %}
+    {% endif %}
       "ssh_username", "${var.ssh_username}"
     )}"
 }

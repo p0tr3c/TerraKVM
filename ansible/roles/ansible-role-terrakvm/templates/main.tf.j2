@@ -90,7 +90,7 @@ resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
     pool = "${var.volume_pool}"
             {% if disk.grow is defined and disk.grow %}
     base_volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}_base.id}"
-    size = "{{ disk.size }}"
+    size = "${var.{{ vm.vm_name }}_{{ disk.name }}_size}"
             {% else %}
     source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
             {% endif %}
@@ -99,7 +99,7 @@ resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
 resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
     name = "${format("%s-%s", var.{{ vm.vm_name }}_vm_name, "{{ disk.name }}")}"
     pool = "${var.volume_pool}"
-    size = "{{ disk.size }}"
+    size = "${var.{{ vm.vm_name }}_{{ disk.name }}_size}"
 }
         {% endif %}
     {% endfor %}
@@ -108,7 +108,11 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
     name = "${var.{{ vm.vm_name }}_vm_name}"
     vcpu = "${var.{{ vm.vm_name }}_ncpu}"
     cpu {
+    {% if vm.cpu_mode is defined %}
+        mode = "{{ vm_cpu_mod }}"
+    {% else %}
         mode = "host-passthrough"
+    {% endif %}
     }
     memory = "${var.{{ vm.vm_name }}_memory}"
     {% if vm.manual is undefined or not vm.manual %}
@@ -139,7 +143,7 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
     {% for disk in vm.disks %}
         {%- if disk.type is defined and disk.type == "iso" %}
         {
-            file = "{{ disk.file_path }}"
+            file = "${var.{{ vm.vm_name }}_{{ disk.name }}_path}"
         }
         {%- else %}
         {
