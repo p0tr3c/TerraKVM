@@ -5,17 +5,6 @@
   vars_files:
     - "{{ playbook_dir }}/../defaults/vars.yml"
   tasks:
-    - name: Create build cache dir
-      file:
-        path: "{{ item }}"
-        state: directory
-        mode: 0700
-      with_items:
-        - "{{ packer_dir }}/packer_cache"
-      tags:
-        - prep
-        - packer
-      when: from_iso
     - name: Create project directory
       file:
         path: "{{ terraform_dir }}"
@@ -23,6 +12,7 @@
         mode: 0700
       tags:
         - always
+
     - name: Create SSH key
       block:
         - command: ssh-keygen -f "{{ terraform_dir }}/{{ project_name}}.pkey" -N ""
@@ -34,26 +24,13 @@
       tags:
         - template
         - ssh
-    - name: Template packer instructions
-      template:
-        src: "{{ template_dir }}/packer/{{ item.name }}.j2"
-        dest: "{{ packer_dir }}/{{ item.name }}"
-      when: build_image or (from_iso and distro in item.distro)
-      with_items:
-        - { name: "template.json", distro: ["centos", "ubuntu"] }
-        - { name: "kickstart.ks", distro: ["centos"] }
-        - { name: "variables.json", distro: ["centos", "ubuntu"] }
-        - { name: "99-cloudinit.cfg", distro: ["centos", "ubuntu"] }
-        - { name: "preseed", distro: ["ubuntu"] }
-      tags:
-        - template
-        - packer
+
     - name: Create download dir
       file:
         path: "{{ packer_dir }}/build"
         state: directory
         mode: 0770
-      when: not from_iso
+
     - name: Download base cloud image
       get_url:
         url: "{{ cloud_images | json_query(download_filter) | json_query('[*].url') | join('') }}"
@@ -61,7 +38,7 @@
         mode: 0660
         checksum: "{{ cloud_images | json_query(download_filter) | json_query('[*].checksum') | join('') }}"
       with_items: "{{ vms }}"
-      when: not item.from_iso
+
     - name: Template terraform instructions
       template:
         src: "{{ template_dir }}/terraform/{{ item.name }}.j2"
@@ -76,20 +53,13 @@
       tags:
         - template
         - terraform
-    - name: Execute build
-      command: packer build -var-file=variables.json template.json
-      args:
-        chdir: "{{ packer_dir }}"
-        creates: "{{ packer_dir }}/build/{{ vm_name }}"
-      tags:
-        - build
-        - packer
-      when: build_image or from_iso
+
     - name: Destroy current infrastructure
       terraform:
         project_path: "{{ terraform_dir }}"
         state: absent
       when: force_rebuild
+
     - name: Deploy via terraform
       terraform:
         project_path: "{{ terraform_dir }}"
@@ -99,12 +69,14 @@
       tags:
         - deploy
         - terraform
+
     - name: Create ssh config
       template:
         src: "{{ template_dir }}/ssh/config"
         dest: "{{ repo_dir }}/{{ project_name }}.config"
         mode: 0600
       with_dict: "{{ terraform_output.outputs }}"
+
     - name: Add host for provisioning
       add_host:
         name: "{{ item.key }}"
@@ -115,12 +87,14 @@
       with_dict: "{{ terraform_output.outputs }}"
       tags:
         - provisioning
+
     - name: Include global provisioning
       include_tasks:
         file: "{{ provisioning_tasks }}"
       when: provisioning_tasks is defined
       tags:
         - provisioning
+
     - name: Include per-host provisioning
       include_tasks:
         file: "{{ delegation.provisioning_playbook }}"
@@ -130,6 +104,7 @@
       when: delegation.provisioning_playbook is defined
       tags:
         - provisioning
+
     - name: Connection information
       debug:
         msg: [
