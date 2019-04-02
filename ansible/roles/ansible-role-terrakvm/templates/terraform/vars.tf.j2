@@ -21,13 +21,7 @@ variable "{{ vm.vm_name }}_{{ disk.name }}_size" {"type" = "string"}
         {% if disk.type is defined and disk.type == "iso" %}
 variable "{{ vm.vm_name }}_{{ disk.name }}_path" {"type" = "string"}
         {% endif %}
-        {% if disk.source_image is defined %}
 variable "{{ vm.vm_name }}_{{ disk.name }}_source" {"type" = "string"}
-        {% else %}
-            {% if not vm.from_iso %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_source" {type = "string"}
-            {% endif %}
-        {% endif %}
     {% endfor %}
     {% for vm_net in vm.networks %}
         {% if vm_net.bridge is not defined %}

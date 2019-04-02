@@ -13,7 +13,7 @@
         creates: "{{ terraform_dir }}/{{ project_name }}.pkey"
     - set_fact:
           ssh_public_key: "{{ lookup('file',  terraform_dir + '/' + project_name  + '.pkey.pub') | b64encode }}"
-  when: ssh_public_key is not defined
+  when: ssh_public_key is undefined
 
 - name: Create download dir
   file:
@@ -28,6 +28,7 @@
     mode: 0660
     checksum: "{{ cloud_images | json_query(download_filter) | json_query('[*].checksum') | join('') }}"
   with_items: "{{ vms }}"
+  when: item.packer_build is undefined or not item.packer_build
 
 - name: Template terraform instructions
   template:
@@ -69,6 +70,14 @@
     ansible_ssh_host: "{{ item.value.value.public_ip }}"
     ansible_ssh_private_key_file: "{{ terraform_dir }}/{{ project_name}}.pkey"
   with_dict: "{{ terraform_output.outputs }}"
+
+- name: Include per-host provisioning
+  include_tasks:
+    file: "{{ ansible_dir }}/{{ delegation.provisioning_tasks }}"
+  loop: "{{ vms }}"
+  loop_control:
+    loop_var: delegation
+  when: delegation.provisioning_tasks is defined
 
 - name: Connection information
   debug:

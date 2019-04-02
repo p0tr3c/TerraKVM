@@ -8,4 +8,7 @@
 
 - name: Build VM(s)
   include_tasks: build.yml
-  when: action == "build"
+  loop: "{{ vms }}"
+  loop_control:
+    loop_var: build_item
+  when: action == "build" and (build_item.packer_build is defined and build_item.packer_build)

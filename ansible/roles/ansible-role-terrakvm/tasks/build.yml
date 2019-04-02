@@ -1,8 +1,14 @@
+- name: Set output directory
+  set_fact:
+    output_directory: "{{ build_item.distro }}_{{ build_item.arch }}"
+
 - name: Template packer instructions
   template:
-    src: packer/{{ item.name }}.j2"
+    src: "packer/{{ item.name }}.j2"
     dest: "{{ packer_dir }}/{{ item.name }}"
-  when: build_image or (from_iso and distro in item.distro)
+  vars:
+    vm_name: "image.qcow2"
+  when: build_item.distro in item.distro
   with_items:
     - { name: "template.json", distro: ["centos", "ubuntu"] }
     - { name: "kickstart.ks", distro: ["centos"] }
@@ -14,4 +20,17 @@
   command: packer build -var-file=variables.json template.json
   args:
     chdir: "{{ packer_dir }}"
-    creates: "{{ packer_dir }}/build/{{ vm_name }}"
+    creates: "{{ output_directory }}/image.qcow2"
+  when: build_item.force_build is not defined or not build_item.force_build
+
+- name: Execute build
+  block:
+    - name: Delete current
+      file:
+        path: "{{ output_directory }}"
+        state: absent
+    - name: Run packer
+      command: packer build -var-file=variables.json template.json
+      args:
+        chdir: "{{ packer_dir }}"
+  when: build_item.force_build is defined and build_item.force_build

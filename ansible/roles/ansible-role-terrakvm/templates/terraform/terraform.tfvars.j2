@@ -10,11 +10,6 @@
 ssh_username = "{{ ssh_username }}"
 ssh_public_key = "{{ ssh_public_key | b64decode }}"
 ssh_private_key_file = "./{{ project_name }}.pkey"
-{% if not from_iso %}
-packer_image = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_iso_filter) | join('')}}"
-{% else %}
-packer_image =  "{{ packer_image | default('../packer/build/dev') }}"
-{% endif %}
 volume_pool =  "{{ volume_pool | default('default') }}"
 cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
 
@@ -29,7 +24,9 @@ cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
         {% if disk.source_image is defined %}
 {{ vm.vm_name }}_{{ disk.name }}_source = "{{ disk.source_image }}"
         {% else %}
-            {% if not vm.from_iso %}
+            {% if vm.packer_build is defined and vm.packer_build %}
+{{ vm.vm_name }}_{{ disk.name }}_source = "{{ packer_dir }}/{{ vm.distro }}_{{ vm.arch }}/image.qcow2"
+            {% else %}
                 {% set terraform_loop_iso_filter = "[?distro=='"+ vm.distro +"' && arch=='" + vm.arch +"'].iso_name" %}
 {{ vm.vm_name }}_{{ disk.name }}_source = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_loop_iso_filter) | join('')}}"
             {% endif %}

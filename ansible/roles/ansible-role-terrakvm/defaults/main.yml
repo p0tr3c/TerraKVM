@@ -12,6 +12,7 @@ memory: 2048
 cloudinit_net_config: false
 # Repo folder locations
 repo_dir: "{{ (playbook_dir + '/../../') | realpath }}"
+ansible_dir: "{{ (repo_dir + '/ansible') | realpath }}"
 packer_dir: "{{ (repo_dir + '/packer') | realpath }}"
 terraform_dir: "{{ (repo_dir + '/terraform/' + project_name ) | realpath }}"
 download_cache_dir: "{{ (repo_dir + '/.download_cache') | realpath }}"
@@ -108,3 +109,4 @@ cloud_images:
 build_image: false
 build_from_qcow: false
 from_iso: false
+force_build: false

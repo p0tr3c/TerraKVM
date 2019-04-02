@@ -3,7 +3,7 @@
   gather_facts: false
   debugger: on_failed
   tasks:
-    - name: Deploy VM(s)
+    - name: Build VM(s)
       include_role:
         name: ansible-role-terrakvm
       vars:
