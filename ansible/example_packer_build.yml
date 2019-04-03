@@ -1,0 +1,21 @@
+project_name: packer_build
+volume_pool: default
+vms:
+  - hostname: build
+    vm_name: build
+    distro: centos
+    arch: amd64
+    ncpu: 12
+    memory: 8196
+    enable_console: true
+    packer_build: true
+    packer_provisioning: example_packer_provisioning_playbook.yml
+    disks:
+      - name: root
+        grow: true
+        size: 42949672960
+    networks:
+      - network_name: default
+        external: true
+        dhcp: true
+    passwd: $6$Jf49XF9g41.Px7qu$LWw8WEV1ZCc0ESrRtK0n.FBYQUz8vxvBUBGw.1xfFPIC2f/Q1ttqhNo3WOX6bpk8X8XcJL8DFU6pYV3q4h/mE.

@@ -2,12 +2,20 @@
   set_fact:
     output_directory: "{{ build_item.distro }}_{{ build_item.arch }}"
 
+- name: Copy provisioning playbook
+  copy:
+    src: "{{ ansible_dir }}/{{ build_item.packer_provisioning }}"
+    dest: "{{ packer_dir }}/{{ build_item.packer_provisioning }}"
+  when: build_item.packer_provisioning is defined
+
 - name: Template packer instructions
   template:
     src: "packer/{{ item.name }}.j2"
     dest: "{{ packer_dir }}/{{ item.name }}"
   vars:
     vm_name: "image.qcow2"
+    distro: "{{ build_item.distro }}"
+    packer_provisioning: "{{ build_item.packer_provisioning | default('') }}"
   when: build_item.distro in item.distro
   with_items:
     - { name: "template.json", distro: ["centos", "ubuntu"] }
@@ -21,6 +29,9 @@
   args:
     chdir: "{{ packer_dir }}"
     creates: "{{ output_directory }}/image.qcow2"
+  environment:
+    PACKER_LOG: 1
+    PACKER_LOG_PATH: "{{ build_item.distro }}_{{ build_item.arch }}.log"
   when: build_item.force_build is not defined or not build_item.force_build
 
 - name: Execute build
@@ -33,4 +44,7 @@
       command: packer build -var-file=variables.json template.json
       args:
         chdir: "{{ packer_dir }}"
+      environment:
+        PACKER_LOG: 1
+        PACKER_LOG_PATH: "{{ build_item.distro }}_{{ build_item.arch }}.log"
   when: build_item.force_build is defined and build_item.force_build

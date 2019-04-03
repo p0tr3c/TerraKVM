@@ -5,17 +5,10 @@
         "ncpu": "{{ ncpu | default('2') }}",
         "memory": "{{ memory | default('2048') }}",
 {% if distro == "centos" %}
-    {% if build_from_qcow %}
-        "disk_image": "true",
-        "iso_url": "https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2",
-        "iso_file": "CentOS-7-x86_64-GenericCloud-1901.qcow2",
-        "iso_checksum": "76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333",
-    {% else %}
         "iso_file": "{{ iso_file | default('CentOS-7-x86_64-NetInstall-1810.iso') }}",
         "iso_external_path": "{{ iso_external_path | default('http://mirror.mhd.uk.as44574.net/mirror.centos.org/7.6.1810/isos/x86_64/') }}",
         "iso_internal_path": "{{ iso_internal_path | default('') }}",
         "iso_checksum": "{{ iso_checksum | default('19d94274ef856c4dfcacb2e7cfe4be73e442a71dd65cc3fb6e46db826040b56e') }}",
-    {% endif %}
         "kickstart_file": "kickstart.ks",
         "ssh_username": "{{ ssh_build_username | default('root') }}",
 {% elif distro == "ubuntu16" and arch == "amd64" %}
@@ -78,13 +71,11 @@
             "iso_checksum": {{ '"{{user `iso_checksum`}}",' }}
             "iso_checksum_type": {{ '"{{ user `iso_checksum_type`}}",' }}
             "iso_target_path": {{ '"{{user `packer_cache_dir`}}/{{user `iso_file`}}",' }}
-    {% if not build_from_qcow %}
             "iso_urls": [
               {{ '"{{user `iso_internal_path`}}/{{user `iso_file`}}",' }}
               {{ '"{{user `iso_external_path`}}/{{user `iso_file`}}"' }}
             ],
             "disk_size": {{ '"{{user `disk_size`}}",' }}
-    {% endif %}
             "disk_image": {{ '"{{user `disk_image`}}",' }}
             "output_directory": {{ '"{{user `output_directory`}}",' }}
             "ssh_wait_timeout": "30s",
@@ -155,6 +146,13 @@
                 "yum install cloud-init cloud-utils -y"
             ]
         },
+    {% if packer_provisioning is defined and packer_provisioning | length %}
+        {
+            "type": "ansible",
+            "playbook_file": "{{ packer_provisioning }}",
+            "user": {{ '"{{user `ssh_username`}}"' }}
+        },
+    {% endif %}
         {
             "type": "file",
             "source": "./99-cloudinit.cfg",

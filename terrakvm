@@ -12,7 +12,7 @@ fi
 
 
 if [ "$1" == "build" ]; then
-  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose "${@}"
+  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose run terrakvm ansible-playbook playbooks/build.yml "${@:2}"
 elif [ "$1" == "deploy" ]; then
   SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose run terrakvm ansible-playbook playbooks/deploy.yml "${@:2}"
 elif [ "$1" == "destroy" ]; then

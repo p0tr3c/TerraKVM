@@ -21,22 +21,30 @@ resource "libvirt_network" "{{ net.network_name }}" {
     {% if vm.manual is undefined or not vm.manual %}
 data "template_file" "{{ vm.vm_name }}_user_data" {
     template = <<EOF
+    {% if vm.cloud_config is undefined %}
 #cloud-config
 users:
   - name: $${ssh_user}
+        {% if vm.passwd is defined and vm.passwd | length %}
+    lock-passwd: false
+    passwd: {{ vm.passwd }}
+        {% else %}
     lock-passwd: true
+        {% endif %}
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
     ssh_authorized_keys:
       - $${ssh_public_key}
-        {% if vm.cloud_init_config is defined %}
-{{ vm.cloud_init_config }}
-        {% endif %}
 EOF
     vars {
         ssh_user = "${var.ssh_username}"
         ssh_public_key = "${var.ssh_public_key}"
     }
+    {% else %}
+{{ vm.cloud_config }}
+EOF
+    {{ vm.cloud_config_vars }}
+    {% endif %}
 }
 
 resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
