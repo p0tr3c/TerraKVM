@@ -142,8 +142,7 @@
         {
             "type": "shell",
             "inline": [
-                "yum remove postfix -y",
-                "yum install cloud-init cloud-utils -y"
+                "yum remove postfix -y"
             ]
         },
     {% if packer_enable_cloudinit %}
