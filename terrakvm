@@ -1,4 +1,13 @@
 #!/bin/bash
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+  echo "Usage:"
+  echo "   ./terrakvm apply - deploy default project"
+  echo "   ./terrakvm destroy - destroy default project"
+  echo "   ./terrakvm build - build packer image"
+  exit 0
+fi
+
+
 if [ -z "$SUDO_UID" ]; then
   SUDO_UID=`id -u`
   SUDO_GID=`id -g`
@@ -6,7 +15,7 @@ fi
 
 which docker-compose > /dev/null 2>&1
 if [ "$?" -ne 0 ]; then
-  echo "docker-compose not in system path!"
+  echo "[-] docker-compose not in system path!"
   exit 1
 fi
 
@@ -15,16 +24,44 @@ export SUDO_GID="$SUDO_GID"
 export LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'`
 export KVM_GID=`getent group kvm | awk -F: '{print $3}'`
 
+if [ ! -z "$2" ]; then
+    if [ ! -z "$3" ]; then
+        PROJECT_FILENAME=`basename $3`
+        PROJECT_ABS_PATH=`realpath $3`
+    else
+        echo "[-] -p must be followed by project name"
+        exit 1
+    fi
+fi
+
 if [ "$1" == "build" ]; then
-  docker-compose run terrakvm ansible-playbook playbooks/build.yml "${@:2}"
+    if [ -z "$3" ]; then
+        echo "[-] build requires project spec (-p)"
+        exit 1
+    fi
+     docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/build.yml -e "@$PROJECT_FILENAME"
+# elif [ "$1" == "plan" ]; then
+#     if [ -z "$PROJECT_FILENAME" ]; then
+#         docker-compose run terrakvm ansible-playbook playbooks/apply.yml
+#     else
+#         docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/plan.yml -e "@$PROJECT_FILENAME"
+#     fi
 elif [ "$1" == "apply" ]; then
-  docker-compose run terrakvm ansible-playbook playbooks/apply.yml "${@:2}"
+    if [ -z "$PROJECT_FILENAME" ]; then
+        docker-compose run terrakvm ansible-playbook playbooks/apply.yml
+    else
+        docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/apply.yml -e "@$PROJECT_FILENAME"
+    fi
 elif [ "$1" == "destroy" ]; then
-  docker-compose run terrakvm ansible-playbook playbooks/destroy.yml "${@:2}"
+    if [ -z "$PROJECT_FILENAME" ]; then
+        docker-compose run terrakvm ansible-playbook playbooks/destroy.yml
+    else
+        docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/destroy.yml -e "@$PROJECT_FILENAME"
+    fi
 elif [ "$1" == "up" ]; then
   docker-compose up
 elif [ "$1" == "down" ]; then
   docker-compose down
 else
-  docker-compose "${@}"
+  echo "[-] Run -h | --help for basic usage"
 fi
