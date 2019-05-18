@@ -110,3 +110,4 @@ build_image: false
 build_from_qcow: false
 from_iso: false
 force_build: false
+packer_enable_cloudinit: true

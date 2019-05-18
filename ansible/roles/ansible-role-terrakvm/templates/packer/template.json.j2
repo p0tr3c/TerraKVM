@@ -142,10 +142,22 @@
         {
             "type": "shell",
             "inline": [
-                "yum remove postfix -y",
+                "yum remove postfix -y"
+            ]
+        },
+    {% if packer_enable_cloudinit %}
+        {
+            "type": "shell",
+            "inline": [
                 "yum install cloud-init cloud-utils -y"
             ]
         },
+        {
+            "type": "file",
+            "source": "./99-cloudinit.cfg",
+            "destination": "/etc/cloud/cloud.cfg.d/99-cloudinit.cfg"
+        },
+    {% endif %}
     {% if packer_provisioning is defined and packer_provisioning | length %}
         {
             "type": "ansible",
@@ -154,17 +166,14 @@
         },
     {% endif %}
         {
-            "type": "file",
-            "source": "./99-cloudinit.cfg",
-            "destination": "/etc/cloud/cloud.cfg.d/99-cloudinit.cfg"
-        },
-        {
             "type": "shell",
             "inline": [
                 "rm -f /var/lib/NetworkManager/*.lease",
                 "sed -i '/HWADDR/d' /etc/sysconfig/network-scripts/ifcfg-eth0",
                 "rm -f /etc/ssh/ssh_host*key*",
+    {% if packer_enable_cloudinit %}
                 "systemctl enable cloud-init cloud-config NetworkManager-wait-online fstrim.timer",
+    {% endif %}
                 "unset HISTFILE"
             ]
         },
