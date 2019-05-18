@@ -10,17 +10,21 @@ if [ "$?" -ne 0 ]; then
   exit 1
 fi
 
+export SUDO_UID="$SUDO_UID"
+export SUDO_GID="$SUDO_GID"
+export LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'`
+export KVM_GID=`getent group kvm | awk -F: '{print $3}'`
 
 if [ "$1" == "build" ]; then
-  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose run terrakvm ansible-playbook playbooks/build.yml "${@:2}"
-elif [ "$1" == "deploy" ]; then
-  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose run terrakvm ansible-playbook playbooks/deploy.yml "${@:2}"
+  docker-compose run terrakvm ansible-playbook playbooks/build.yml "${@:2}"
+elif [ "$1" == "apply" ]; then
+  docker-compose run terrakvm ansible-playbook playbooks/apply.yml "${@:2}"
 elif [ "$1" == "destroy" ]; then
-  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose run terrakvm ansible-playbook playbooks/destroy.yml "${@:2}"
+  docker-compose run terrakvm ansible-playbook playbooks/destroy.yml "${@:2}"
 elif [ "$1" == "up" ]; then
-  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose up
+  docker-compose up
 elif [ "$1" == "down" ]; then
-  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose down
+  docker-compose down
 else
-  SUDO_UID="$SUDO_UID" SUDO_GID="$SUDO_GID" LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'` KVM_GID=`getent group kvm | awk -F: '{print $3}'` docker-compose "${@}"
+  docker-compose "${@}"
 fi

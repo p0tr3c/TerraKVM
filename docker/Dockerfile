@@ -72,8 +72,6 @@ RUN wget "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terrafor
     chmod 0755 /usr/local/sbin/terraform && \
     rm -rf /tmp/build/*
 
-
-
 # Download and install vault
 ENV VAULT_VERSION 1.0.2
 RUN wget "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip" && \
@@ -137,10 +135,6 @@ RUN rm -rf /tmp/build
 
 # Set working dir
 WORKDIR /home/$USER_NAME/
-
-# Install virtualenv
-RUN pip install virtualenv
-RUN pip install virtualenvwrapper
 
 # Copy wait-for-it.sh
 COPY wait-for-it.sh /usr/local/sbin/wait-for-it.sh
