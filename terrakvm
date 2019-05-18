@@ -1,9 +1,10 @@
 #!/bin/bash
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   echo "Usage:"
-  echo "   ./terrakvm apply - deploy default project"
-  echo "   ./terrakvm destroy - destroy default project"
-  echo "   ./terrakvm build - build packer image"
+  echo "   ./terrakvm apply     : deploy default project"
+  echo "   ./terrakvm destroy   : destroy default project"
+  echo "   ./terrakvm build     : build packer image"
+  echo "   ./terrakvm <action> -p <project_spec>     : specify project specification"
   exit 0
 fi
 
