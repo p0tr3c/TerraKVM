@@ -1,68 +1,116 @@
 #!/bin/bash
-if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-  echo "Usage:"
-  echo "   ./terrakvm apply     : deploy default project"
-  echo "   ./terrakvm destroy   : destroy default project"
-  echo "   ./terrakvm build     : build packer image"
-  echo "   ./terrakvm <action> -p <project_spec>     : specify project specification"
-  exit 0
-fi
 
-
-if [ -z "$SUDO_UID" ]; then
-  SUDO_UID=`id -u`
-  SUDO_GID=`id -g`
-fi
-
-which docker-compose > /dev/null 2>&1
-if [ "$?" -ne 0 ]; then
-  echo "[-] docker-compose not in system path!"
-  exit 1
-fi
-
-export SUDO_UID="$SUDO_UID"
-export SUDO_GID="$SUDO_GID"
-export LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'`
-export KVM_GID=`getent group kvm | awk -F: '{print $3}'`
-
-if [ ! -z "$2" ]; then
-    if [ ! -z "$3" ]; then
-        PROJECT_FILENAME=`basename $3`
-        PROJECT_ABS_PATH=`realpath $3`
-    else
-        echo "[-] -p must be followed by project name"
+function parse_extra_args(){
+  while getopts "p:e:" opt; do
+    case ${opt} in
+      p )
+        project=$OPTARG
+        ;;
+      e )
+        extra_args+=("-e $OPTARG")
+        ;;
+      \? )
+        echo "Invalid Option: -$OPTARG" 1>&2
         exit 1
-    fi
-fi
-
-if [ "$1" == "build" ]; then
-    if [ -z "$3" ]; then
-        echo "[-] build requires project spec (-p)"
+        ;;
+      : )
+        echo "Invalid Option: -$OPTARG requires an argument" 1>&2
         exit 1
-    fi
-     docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/build.yml -e "@$PROJECT_FILENAME"
-# elif [ "$1" == "plan" ]; then
-#     if [ -z "$PROJECT_FILENAME" ]; then
-#         docker-compose run terrakvm ansible-playbook playbooks/apply.yml
-#     else
-#         docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/plan.yml -e "@$PROJECT_FILENAME"
-#     fi
-elif [ "$1" == "apply" ]; then
-    if [ -z "$PROJECT_FILENAME" ]; then
-        docker-compose run terrakvm ansible-playbook playbooks/apply.yml
-    else
-        docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/apply.yml -e "@$PROJECT_FILENAME"
-    fi
-elif [ "$1" == "destroy" ]; then
-    if [ -z "$PROJECT_FILENAME" ]; then
-        docker-compose run terrakvm ansible-playbook playbooks/destroy.yml
-    else
-        docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/destroy.yml -e "@$PROJECT_FILENAME"
-    fi
-elif [ "$1" == "up" ]; then
-  docker-compose up
-elif [ "$1" == "down" ]; then
-  docker-compose down
-else
-  echo "[-] Run -h | --help for basic usage"
-fi
+        ;;
+    esac
+  done
+  shift $((OPTIND -1))
+}
+
+function pre_assert(){
+  parse_extra_args "$@"
+
+  which docker-compose > /dev/null 2>&1
+  if [ "$?" -ne 0 ]; then
+    echo "[-] docker-compose not in system path!"
+    exit 1
+  fi
+
+  if [ -z "$SUDO_UID" ]; then
+    SUDO_UID=`id -u`
+    SUDO_GID=`id -g`
+  fi
+
+  export SUDO_UID="$SUDO_UID"
+  export SUDO_GID="$SUDO_GID"
+  export LIBVIRT_GID=`getent group libvirt | awk -F: '{print $3}'`
+  export KVM_GID=`getent group kvm | awk -F: '{print $3}'`
+
+  if ! [ -z "$project" ]; then
+    PROJECT_ABS_PATH=`realpath $project`
+    PROJECT_FILENAME=`basename $project`
+  fi
+}
+
+
+function do_apply(){
+  pre_assert $@
+  if [ -z "$PROJECT_FILENAME" ]; then
+      docker-compose run terrakvm ansible-playbook playbooks/apply.yml "${extra_args[@]}"
+  else
+      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/apply.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
+  fi
+}
+
+function do_destroy(){
+  pre_assert $@
+  if [ -z "$PROJECT_FILENAME" ]; then
+      docker-compose run terrakvm ansible-playbook playbooks/destroy.yml "${extra_args[@]}"
+  else
+      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/destroy.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
+  fi
+}
+
+function do_build(){
+  pre_assert "$@"
+  if [ -z "$project" ]; then
+      echo "[-] build requires project spec (-p)"
+      exit 1
+  fi
+  docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/build.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
+}
+
+function main(){
+  project=""
+  while getopts ":h" opt; do
+    case ${opt} in
+      h )
+        echo "Usage:"
+        echo "    $0 -h                      Display this help message."
+        echo "    $0 apply <project>         Deploy <project>."
+        echo "    $0 destroy <project>       Destroy <project>."
+        echo "    $0 build <project>         Build <project>."
+        exit 0
+        ;;
+     \? )
+       echo "Invalid Option: -$OPTARG" 1>&2
+       exit 1
+       ;;
+    esac
+  done
+  shift $((OPTIND -1))
+
+  subcommand=$1; shift
+  case "$subcommand" in
+    apply)
+      do_apply $@
+      ;;
+    destroy)
+      do_destroy $@
+      ;;
+    build)
+      do_build $@
+      ;;
+    *)
+      echo "[-] Unknown command"
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
