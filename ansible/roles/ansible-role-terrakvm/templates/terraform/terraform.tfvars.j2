@@ -36,7 +36,7 @@ cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
         {% if vm_net.bridge is not defined %}
 {{ vm.vm_name }}_{{ vm_net.network_name }} = "{{ vm_net.network_name }}"
             {% if vm_net.address is defined %}
-{{ vm.vm_name }}_{{ vm_net.netowrk_name }}_address = "{{ vm_net.address }}"
+{{ vm.vm_name }}_{{ vm_net.network_name }}_address = "{{ vm_net.address }}"
             {% endif %}
         {% endif %}
     {% endfor %}
