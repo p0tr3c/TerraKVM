@@ -14,16 +14,23 @@ variable "ssh_username" {type = "string"}
 variable "ssh_public_key" {type = "string"}
 variable "ssh_private_key_file" {type = "string"}
 {% for vm in vms %}
-    {% for disk in vm.disks %}
-        {% if disk.size is defined %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_size" {"type" = "string"}
-        {% endif %}
-        {% if disk.type is defined and disk.type == "iso" %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_path" {"type" = "string"}
-        {% endif %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_source" {"type" = "string"}
-    {% endfor %}
-    {% for vm_net in vm.networks %}
+  {% for disk in vm.disks %}
+    {% if disk.type is undefined or disk.type != "iso" %}
+variable "{{ vm.vm_name }}_{{ disk.name }}" {type = "string"}
+variable "{{ vm.vm_name }}_{{ disk.name }}_pool" {type = "string", default = "default"}
+      {% if disk.size is defined %}
+variable "{{ vm.vm_name }}_{{ disk.name }}_size" {type = "string"}
+      {% endif %}
+      {% if disk.base_volume_name is defined %}
+variable "{{ vm.vm_name }}_{{ disk.name }}_base_volume_name" {type = "string"}
+variable "{{ vm.vm_name }}_{{ disk.name }}_base_volume_pool" {type = "string", default = "default"}
+      {% endif %}
+    {% endif %}
+    {% if disk.source is defined %}
+variable "{{ vm.vm_name }}_{{ disk.name }}_source" {type = "string"}
+    {% endif %}
+  {% endfor %}
+  {% for vm_net in vm.networks %}
         {% if vm_net.bridge is not defined %}
 variable "{{ vm.vm_name }}_{{ vm_net.network_name }}" {type = "string"}
             {% if vm_net.address is defined %}

@@ -15,22 +15,20 @@ cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
 
 {% for vm in vms %}
     {% for disk in vm.disks %}
+      {% if disk.type is undefined or disk.type != "iso" %}
+{{ vm.vm_name }}_{{ disk.name }} = "{{vm.vm_name }}_{{ disk.name }}"
+{{ vm.vm_name }}_{{ disk.name }}_pool = "{{ disk.pool | default('default') }}"
         {% if disk.size is defined %}
 {{ vm.vm_name }}_{{ disk.name }}_size = "{{ disk.size }}"
         {% endif %}
-        {% if disk.type is defined and disk.type == "iso" %}
-{{ vm.vm_name }}_{{ disk.name }}_path = "{{ disk.path }}"
+        {% if disk.base_volume_name is defined %}
+{{ vm.vm_name }}_{{ disk.name }}_base_volume_name = "{{ disk.base_volume_name }}"
+{{ vm.vm_name }}_{{ disk.name }}_base_volume_pool = "{{ disk.base_volume_pool | default('default') }}"
         {% endif %}
-        {% if disk.source_image is defined %}
-{{ vm.vm_name }}_{{ disk.name }}_source = "{{ disk.source_image }}"
-        {% else %}
-            {% if vm.packer_build is defined and vm.packer_build %}
-{{ vm.vm_name }}_{{ disk.name }}_source = "{{ packer_dir }}/{{ vm.distro }}_{{ vm.arch }}/image.qcow2"
-            {% else %}
-                {% set terraform_loop_iso_filter = "[?distro=='"+ vm.distro +"' && arch=='" + vm.arch +"'].iso_name" %}
-{{ vm.vm_name }}_{{ disk.name }}_source = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_loop_iso_filter) | join('')}}"
-            {% endif %}
-        {% endif %}
+      {% endif %}
+      {% if disk.source is defined %}
+{{ vm.vm_name }}_{{ disk.name }}_source = "{{ disk.source }}"
+      {% endif %}
     {% endfor %}
     {% for vm_net in vm.networks %}
         {% if vm_net.bridge is not defined %}
