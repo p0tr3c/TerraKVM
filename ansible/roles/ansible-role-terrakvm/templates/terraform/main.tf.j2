@@ -84,7 +84,7 @@ resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
     meta_data  = <<EOF
 local-hostname: ${var.{{ vm.vm_name }}_vm_name}
 EOF
-        {% if vm.cloudinit_net_config %}
+        {% if vm.cloud_net_config is defined %}
     network_config = <<EOF
 version: 1
 config:
@@ -116,20 +116,35 @@ EOF
 
     {% for disk in vm.disks %}
       {% if disk.type is undefined or disk.type != "iso" %}
+        {% if disk.size is defined and (disk.source is undefined or disk.source != "/dev/zero") %}
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}_base" {
+    name = "${var.{{ vm.vm_name }}_{{ disk.name }}_base }"
+    pool = "${var.{{ vm.vm_name }}_{{ disk.name }}_pool}"
+    source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
+}
+
+resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}" {
+    name = "${var.{{ vm.vm_name }}_{{ disk.name }}}"
+    pool = "${var.{{ vm.vm_name }}_{{ disk.name }}_pool}"
+    base_volume_id = "${libvirt_volume.{{ vm.vm_name }}_{{ disk.name }}_base.id}"
+    size = "${var.{{ vm.vm_name }}_{{ disk.name }}_size}"
+}
+        {% else %}
 resource "libvirt_volume" "{{ vm.vm_name }}_{{ disk.name }}"{
     name = "${var.{{ vm.vm_name }}_{{ disk.name }}}"
     pool = "${var.{{ vm.vm_name }}_{{ disk.name }}_pool}"
-        {% if disk.size is defined %}
+          {% if disk.size is defined %}
     size = "${var.{{ vm.vm_name }}_{{ disk.name }}_size}"
-        {% endif %}
-        {% if disk.source is defined %}
-    source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
-        {% endif %}
-        {% if disk.base_volume_name is defined %}
+          {% endif %}
+          {% if disk.base_volume_name is defined %}
     base_volume_name = "${var.{{ vm.vm_name }}_{{ disk.name }}_base_volume_name}"
     base_volume_pool = "${var.{{ vm.vm_name }}_{{ disk.name }}_base_volume_pool}"
-        {% endif %}
+          {% endif %}
+          {% if disk.source is undefined or disk.source != "/dev/zero" %}
+    source = "${var.{{ vm.vm_name }}_{{ disk.name }}_source}"
+          {% endif %}
 }
+        {% endif %}
       {% endif %}
     {% endfor %}
 

@@ -7,4 +7,4 @@
       include_role:
         name: ansible-role-terrakvm
       vars:
-        action: deploy
+        action: apply
