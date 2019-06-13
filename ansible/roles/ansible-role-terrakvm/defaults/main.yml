@@ -52,8 +52,6 @@ vms:
     memory: "{{ memory }}"
     disks:
       - name: root
-        grow: true
-        size: 21474836480
     networks:
       - network_name: default
         external: true
