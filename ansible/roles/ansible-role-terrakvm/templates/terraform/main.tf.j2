@@ -3,50 +3,6 @@ provider "libvirt" {
     uri = "qemu:///system"
 }
 
-{% if networks is defined %}
-  {%- for net in networks %}
-resource "libvirt_network" "{{ net.name }}" {
-    name = "${var.{{ net.name }}}"
-    mode = "${var.{{ net.name }}_mode}"
-    {% if net.domain is defined %}
-    domain = "${var.{{ net.name }}_domain}"
-    {% endif %}
-    {% if net.addresses is defined %}
-    addresses = "${var.{{ net.name }}_addresses}"
-    {% endif %}
-    {% if net.bridge is defined %}
-    bridge = "${var.{{ net.name }}_bridge}"
-    {% endif %}
-    {% if net.mtu is defined %}
-    mtu = "${var.{{ net.name }}_mtu}"
-    {% endif %}
-    {% if net.autostart is defined %}
-    autostart = "${var.{{ net.name }}_autostart}"
-    {% endif %}
-    {% if net.routes is defined %}
-    routes = "${var.{{ net.name }}_routes}"
-    {% endif %}
-    {% if net.dns is defined %}
-    dns = {
-      {% for key, value in net.dns.items() %}
-        {% if key == "local_only" %}
-        local_only = "{{ value }}"
-        {% endif %}
-        {% if key == "enabled" %}
-        enabled = "{{ value }}"
-        {% endif %}
-      {% endfor %}
-    }
-    {% endif %}
-    {% if net.dhcp is defined %}
-    dhcp = {
-      enabled = {{ net.dhcp }}
-    }
-    {% endif %}
-}
-  {% endfor %}
-{% endif %}
-
 {% for vm in vms %}
     {% if vm.cloud_init is undefined or not vm.cloud_init %}
 data "template_file" "{{ vm.vm_name }}_user_data" {
@@ -84,7 +40,7 @@ resource "libvirt_cloudinit_disk" "{{ vm.vm_name }}" {
     meta_data  = <<EOF
 local-hostname: ${var.{{ vm.vm_name }}_vm_name}
 EOF
-        {% if vm.cloudinit_net_config %}
+        {% if vm.cloudinit_net_config is defined %}
     network_config = <<EOF
 version: 1
 config:
