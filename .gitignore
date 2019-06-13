@@ -1,3 +1,7 @@
 *.pkey*
 *.config
 *.archive
+*.log
+.trash
+ansible/*.yml
+ansible/*.yaml
