@@ -13,6 +13,11 @@ Parameters:
     Type: String
     Default: aws/codebuild/docker:17.09.0
     Description: Docker Image used by CodeBuild
+  GitHubOAuthToken:
+    Description: The OAuthToken of the GitHub user.
+    Type: AWS::SSM::Parameter::Value<String>
+    NoEcho: true
+    Default: /TerraKVM/github-oauth
   GitHubOwner:
     Description: The owner of the GitHub repository.
     Default: p0tr3c
@@ -56,6 +61,12 @@ Resources:
             Resource:
               - '*'
           - Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:ssm:*:${AWS::AccountId}:parameter/TerraKVM/*"
+          - Action:
               - sns:Publish
             Effect: Allow
             Resource:
@@ -64,7 +75,7 @@ Resources:
               - s3:ListBucket
             Effect: Allow
             Resource:
-			  - !GetAtt ArtifactBucket.Arn
+              - !GetAtt ArtifactBucket.Arn
           - Action:
               - s3:PutObject
               - s3:GetObject
@@ -96,16 +107,23 @@ Resources:
         Version: 2012-10-17
         Statement:
           - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - "*"
+          - Action:
               - ssm:GetParameter
               - ssm:GetParameters
             Effect: Allow
             Resource:
-              - !Sub "arn:aws:ssm:*:${AWS::AccountId}:parameter/terrakvm/*"
+              - !Sub "arn:aws:ssm:*:${AWS::AccountId}:parameter/TerraKVM/*"
           - Action:
               - s3:ListBucket
             Effect: Allow
             Resource:
-			  - !GetAtt ArtifactBucket.Arn
+              - !GetAtt ArtifactBucket.Arn
           - Action:
               - s3:PutObject
               - s3:GetObject
@@ -127,7 +145,7 @@ Resources:
             Service: codebuild.amazonaws.com
           Action: sts:AssumeRole
       ManagedPolicyArns:
-        - !Ref TerraformBuildPolicy
+        - !Ref TerraKVMBuildPolicy
         
   TerraKVMPipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -155,12 +173,13 @@ Resources:
                 Owner: !Ref GitHubOwner
                 Repo: !Ref GitHubRepo
                 Branch: !Ref GitHubRepoBranch 
+                OAuthToken: !Ref GitHubOAuthToken
         - Name: Test
           Actions:
             - Name: Execute
               RunOrder: 1
               ActionTypeId:
-                Category: Build
+                Category: Test
                 Owner: AWS
                 Version: '1'
                 Provider: CodeBuild
@@ -168,17 +187,8 @@ Resources:
                 - Name: TerraKVMSource
               OutputArtifacts: []
               Configuration:
-                ProjectName: !Ref InvokeTerraKVMTests
-            - Name: Notification
-              RunOrder: 2
-              ActionTypeId:
-                Category: Notification
-                Owner: AWS
-                Version: '1'
-                Provider: Manual
-              Configuration:
-                NotificationArn: !Ref SNSTerraKVMNotifiction 
-  InvokeTerraKMVTests:
+                ProjectName: !Ref InvokeTerraKVMTests 
+  InvokeTerraKVMTests:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: InvokeTests
