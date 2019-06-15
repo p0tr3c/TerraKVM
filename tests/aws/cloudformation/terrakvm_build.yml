@@ -36,7 +36,7 @@ Resources:
   InvokeTerraKVMTests:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: InvokeTests
+      Name: TerraKVMInvokeTests
       BadgeEnabled: True
       ServiceRole: !Ref TerraKVMBuildRole
       Artifacts:

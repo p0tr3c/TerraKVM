@@ -1,6 +1,6 @@
 # TerraKVM
 
-![Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiczBPREhJT3cyUi9POUlZaGNLTFBweTVGTDdjTnJ6NTZ5RGExTksyVzQ5NnIrTlhtc1hPWk45TXVJUHk2UGxZOUJEdnpVWkdCWjlVTFZlMnlKK1h0bXlnPSIsIml2UGFyYW1ldGVyU3BlYyI6InpNU1FhWWdWNk0rZ2dGd2oiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+![Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiNjl0NEJ3R2xUOGFna3dIaXVnWklxVSs4NXpNOWxlZnlGY2JGcjAvdGJLMXUra2s4eCtpNVB3dWFvcjZWSmJ1L3NQenU2TExtbDlQN2kvNVBvYXU0QWZvPSIsIml2UGFyYW1ldGVyU3BlYyI6InlVSGdzMEZEZC9OS0hUM2ciLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 
 Deploy VMs on [KVM](https://www.linux-kvm.org/page/Main_Page) via [docker](https://www.docker.com/)/[ansible](https://www.ansible.com/)/[terraform](https://www.terraform.io/)
 
