@@ -1,6 +1,6 @@
 #!/bin/bash
-PROJECT_DIR=`realpath "$PWD/../"`
-TEST_DIR=`realpath $PWD`
+PROJECT_DIR=`readlink -f "$PWD/../"`
+TEST_DIR=`readlink -f $PWD`
 
 TEST_NAME="`basename $0`"
 TEST_NAME="${TEST_NAME%.*}"
