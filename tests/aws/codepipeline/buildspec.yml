@@ -13,7 +13,7 @@ phases:
   build:
     commands:
       - cd "${CODEBUILD_SRC_DIR}/tests"
-      - bash run_online_tests.sh
+      - bash aws_run.sh
   post_build:
     commands:
       - echo "terrakvm online tests completed on `date`"
