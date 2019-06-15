@@ -192,6 +192,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: InvokeTests
+      BadgeEnabled: True
       ServiceRole: !Ref TerraKVMBuildRole
       Artifacts:
         Type: CODEPIPELINE
