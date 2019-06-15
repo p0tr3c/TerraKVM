@@ -2,14 +2,7 @@ version: 0.2
 phases:
   install:
     commands:
-      - cd /usr/bin
-      - add-apt-repository universe
-      - apt-get update
-      - apt-get install -y jq
       - pip install ansible
-  pre_build:
-    commands:
-      - cd "${CODEBUILD_SRC_DIR}/tests"
   build:
     commands:
       - cd "${CODEBUILD_SRC_DIR}/tests"

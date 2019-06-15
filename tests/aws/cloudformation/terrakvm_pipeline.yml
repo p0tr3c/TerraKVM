@@ -202,4 +202,4 @@ Resources:
         Type: LINUX_CONTAINER
       Source:
         Type: CODEPIPELINE
-        BuildSpec: tests/aws/codepipeline/buildspec.yml 
+        BuildSpec: tests/aws/codebuild/buildspec.yml 

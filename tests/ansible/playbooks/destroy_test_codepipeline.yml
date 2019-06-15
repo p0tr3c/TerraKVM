@@ -1,0 +1,17 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ssm_oauth_location: /TerraKVM/github-oauth
+  tasks:
+    - name: Deploy Cloudformation
+      cloudformation:
+        stack_name: TerraKVMTests
+        state: absent
+        region: "{{ aws_region }}"
+        disable_rollback: true
+        template: "{{ repo_root }}/tests/aws/cloudformation/terrakvm_pipeline.yml"
+        template_parameters:
+          GitHubOAuthToken: "{{ ssm_oauth_location }}"
+
+        
