@@ -72,29 +72,29 @@ cloud_images:
     checksum: sha256:d987209719fadaf81b8bff85c5d3590a1d3dac6357e4838fde8357086c49b5b4
     distro: fedora28
     arch: amd64
-  - url: https://cloud-images.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-cloudimg-amd64.img
+  - url: https://cloud-images.ubuntu.com/releases/18.04/release-20190604/ubuntu-18.04-server-cloudimg-amd64.img
     iso_name: bionic-server-cloudimg-amd64.img
-    checksum: sha256:6f18b85cd1f5f8a46d3c07fef61b4075d50cb0b9e16471d554375075b7d3f574
+    checksum: sha256:d29ee3dcb7774796690792380c1d0d7202d21d348ebca9082d84b3374e0cc976
     distro: ubuntu
     arch: amd64
-  - url: https://cloud-images.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-cloudimg-i386.img
+  - url: https://cloud-images.ubuntu.com/releases/18.04/release-20190604/ubuntu-18.04-server-cloudimg-i386.img 
     iso_name: bionic-server-cloudimg-i386.img
-    checksum: sha256:50e58c2bab851a404fc04575a1ccb1c2856ad10d269243622658b01216a4b8c2
+    checksum: sha256:4007614a8e1828e083ba9f04f4025e31501abc9a19c3c3206848dd4dbf1d6bc3
     distro: ubuntu
     arch: "x86"
-  - url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
+  - url: https://cloud-images.ubuntu.com/releases/16.04/release-20190605/ubuntu-16.04-server-cloudimg-amd64-disk1.img
     iso_name: ubuntu-16.04-server-cloudimg-amd64-disk1.img
-    checksum: sha256:2d4366c9f7512c731fa1c9a5a431ec98a2bc50c4bd31e1e85777f1cbbbe0f412
+    checksum: sha256:b88291909f2782acf67f01647f42866d31d60056a176cb5f1911774004c6487b
     distro: ubuntu16
     arch: amd64
-  - url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-i386-disk1.img
+  - url: https://cloud-images.ubuntu.com/releases/16.04/release-20190605/ubuntu-16.04-server-cloudimg-i386-disk1.img
     iso_name: ubuntu-16.04-server-cloudimg-i386-disk1.img
-    checksum: sha256:9d1be474c30bfbbde490c9eadd0eb9481de33923fa34bcceea97a2d7a54bba75
+    checksum: sha256:e30091144c73483822b7c27193e9d47346dd1064229da577c3fedcf943f7cfcc
     distro: ubuntu16
     arch: "x86"
-  - url: https://cdimage.debian.org/cdimage/openstack/current/debian-9.7.0-openstack-amd64.qcow2
-    iso_name: debian-9.7.0-openstack-amd64.qcow2
-    checksum: sha256:3b789864962561c54ed4ebc4abd261470fecfe99c8e8e3ae242a72c03bf5a82f
+  - url: https://cdimage.debian.org/cdimage/openstack/archive/9.9.1-20190515/debian-9.9.1-20190515-openstack-amd64.qcow2    
+    iso_name: debian-9.9.1-20190515-openstack-amd64.qcow2    
+    checksum: sha256:b19827e34feaddbbb3a2848a19fe1c48bc73fc884ba68bb25a8d3e08405e669d
     distro: debian
     arch: amd64
   - url: http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/x86_64/alpine-virt-3.9.0-x86_64.iso

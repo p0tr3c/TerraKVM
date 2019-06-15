@@ -29,6 +29,7 @@
     checksum: "{{ cloud_images | json_query(download_filter) | json_query('[*].checksum') | join('') }}"
   with_items: "{{ vms }}"
   when: item.download_cloudimage | default('true')
+  tags: download_cloud_image
 
 - name: Template terraform instructions
   template:
