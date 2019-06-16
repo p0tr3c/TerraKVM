@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Execute online tests on gcloud
+Parameters:
+  DockerBuildImage:
+    Type: String
+    Default: aws/codebuild/docker:17.09.0
+    Description: Docker Image used by CodeBuild
+Resources:
+  TerraKVMGCloudBuildPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: TerraKVMGCloudBuildPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - "*"
+  TerraKVMGCloudBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: TerraKVMGCloudBuildRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codebuild.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref TerraKVMGCloudBuildPolicy
+  InvokeTerraKVMGCloudTests:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: TerraKVMGCloudInvokeTests
+      BadgeEnabled: True
+      ServiceRole: !Ref TerraKVMGCloudBuildRole
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref DockerBuildImage
+        Type: LINUX_CONTAINER
+      Source:
+        BuildSpec: tests/aws/codebuild/gcloud_tests.yml
+        Location: https://github.com/p0tr3c/TerraKVM.git
+        ReportBuildStatus: True
+        Type: GITHUB

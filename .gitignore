@@ -6,3 +6,5 @@
 ansible/*.yml
 ansible/*.yaml
 tests/*.log
+*.tfstate
+**/.terraform

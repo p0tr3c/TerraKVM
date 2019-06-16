@@ -1,0 +1,6 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Run test codebuild
+      command: aws codebuild start-build --project-name TerraKVMGCloudInvokeTests --region "{{ aws_region }}"
