@@ -2,16 +2,12 @@ terraform {
   backend "s3" {}
 }
 
-provider "google" {
-  credentials = "${file("terrakvmtest.json")}"
-  project     = "terrakvmtest"
-  region      = "europe-west2"
-}
+provider "google" {}
 
 resource "google_compute_instance" "ubuntu" {
   name         = "ubuntu"
   machine_type = "n1-standard-1"
-  zone         = "europe-west2-a"
+  zone         = "${var.gcloud_zone}"
   boot_disk {
     initialize_params {
       image = "vmx-ubuntu"
@@ -30,7 +26,7 @@ resource "google_compute_instance" "ubuntu" {
 resource "google_compute_instance" "centos" {
   name         = "centos"
   machine_type = "n1-standard-1"
-  zone         = "europe-west2-a"
+  zone         = "${var.gcloud_zone}"
   boot_disk {
     initialize_params {
       image = "vmx-centos"
@@ -49,7 +45,7 @@ resource "google_compute_instance" "centos" {
 resource "google_compute_instance" "debian" {
   name         = "debian"
   machine_type = "n1-standard-1"
-  zone         = "europe-west2-a"
+  zone         = "${var.gcloud_zone}"
   boot_disk {
     initialize_params {
       image = "vmx-debian"

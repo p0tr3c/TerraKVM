@@ -2,6 +2,23 @@
   connection: local
   gather_facts: false
   tasks:
+    - name: Get AWS facts
+      aws_caller_facts:
+      register: aws_facts
+      tags:
+        - always
+    - name: Upload config to SSM
+      aws_ssm_parameter_store:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        description: "Deployment Region"
+        region: "{{ item.region }}"
+      loop:
+        - { name: /terrakvm/tf_state_bucket, value: "{{ state_bucket_name }}-{{ aws_region }}-{{ aws_facts.account }}", region: "{{ aws_region }}" }
+        - { name: /terrakvm/aws_region, value: "{{ aws_region }}", region: "{{ aws_region }}" }
+        - { name: /terrakvm/tf_state_key, value: "{{ gcloud_test_state_file }}", region: "{{ aws_region }}" }
+        - { name: /terrakvm/gcloud_access_file, value: "{{ gcloud_access_file }}", region: "{{ aws_region }}" }
+        - { name: /terrakvm/gcloud_zone, value: "{{ gcloud_compute_zone }}", region: "{{ aws_region }}" }
     - name: Deploy Cloudformation
       cloudformation:
         stack_name: TerraKVMGCloudTests
@@ -9,4 +26,6 @@
         region: "{{ aws_region }}"
         disable_rollback: true
         template: "{{ repo_root }}/tests/aws/cloudformation/codebuild_gcloud_tests.yml" 
+        template_parameters:
+          ArtifactBucketName: "{{ state_bucket_name }}"
         
