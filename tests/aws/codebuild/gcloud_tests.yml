@@ -18,8 +18,8 @@ phases:
   pre_build:
     commands:
       - cd "$CODEBUILD_SRC_DIR"
-      - . "tests/terraform/google_cloud/test_support/deployment_env.sh"
-      - cd tests/terraform/google_cloud/test_support/ 
+      - cd tests/terraform/google_cloud/test_support/
+      - . "./deployment_env.sh"
       - terraform init -backend-config "bucket=$TF_ENV_tf_state_bucket" -backend-config "region=$TF_ENV_aws_region" -backend-config "key=$TF_ENV_state_key"
       - terraform plan -out=tfplan
       - terraform apply tfplan
