@@ -2,6 +2,7 @@ version: 0.2
 env:
   variables:
     TF_VERSION: "0.11.8"
+    SSM_REGION: "eu-west-1"
 phases:
   install:
     commands:
@@ -13,15 +14,26 @@ phases:
       - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add -
       - apt-get update -y
       - apt-get install google-cloud-sdk -y --force-yes 
+      - apt-get install -y jq
   pre_build:
     commands:
-      - echo "Build gcloud infra here"
+      - cd "$CODEBUILD_SRC_DIR"
+      - cd tests/terraform/google_cloud/test_support
+      - . deployment_env.sh
+      - terraform init -backend-config "bucket=$TF_ENV_tf_state_bucket" -backend-config "region=$TF_ENV_aws_region" -backend-config "key=$TF_ENV_state_key"
+      - terraform plan -out=tfplan
+      - terraform apply tfplan
   build:
     commands:
       - echo "Execute distributed tests here"
   post_build:
     commands:
-      - echo "Destroy gcloud infra here"
+      - cd "$CODEBUILD_SRC_DIR"
+      - cd tests/terraform/google_cloud/test_support
+      - . deployment_env.sh
+      - terraform init -backend-config "bucket=$TF_ENV_tf_state_bucket" -backend-config "region=$TF_ENV_aws_region" -backend-config "key=$TF_ENV_state_key"
+      - terraform plan -out=tfplan -destroy
+      - terraform apply tfplan
 artifacts:
   files:
     - '**/*'

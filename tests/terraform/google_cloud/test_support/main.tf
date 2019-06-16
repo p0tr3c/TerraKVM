@@ -1,3 +1,7 @@
+terraform {
+  backend "s3" {}
+}
+
 provider "google" {
   credentials = "${file("terrakvmtest.json")}"
   project     = "terrakvmtest"

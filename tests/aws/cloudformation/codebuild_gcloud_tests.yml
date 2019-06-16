@@ -5,7 +5,18 @@ Parameters:
     Type: String
     Default: aws/codebuild/docker:17.09.0
     Description: Docker Image used by CodeBuild
+  ArtifactBucketName:
+    Type: String
+    Default: terrakvm
+    Description: Artifact S3 BucketName
 Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Sub ${ArtifactBucketName}-${AWS::Region}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
   TerraKVMGCloudBuildPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -13,6 +24,20 @@ Resources:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
+          - Action:
+              - s3:ListBucket
+            Effect: Allow
+            Resource:
+              - !GetAtt ArtifactBucket.Arn
+          - Action:
+              - s3:PutObject
+              - s3:GetObject
+            Effect: Allow
+            Resource:
+              - !Join
+                 - ''
+                 - - !GetAtt ArtifactBucket.Arn
+                   - '/*'
           - Action:
               - logs:CreateLogGroup
               - logs:CreateLogStream
