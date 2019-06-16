@@ -8,7 +8,7 @@ export GOOGLE_REGION=`aws ssm get-parameters --name /terrakvm/gcloud_region --re
 export TF_ENV_gcloud_zone=`aws ssm get-parameters --name /terrakvm/gcloud_compute_zone --region "$SSM_REGION" | jq -r '.Parameters[0].Value'`
 
 aws s3 cp "s3://${TF_ENV_tf_state_bucket}/${GOOGLE_CLOUD_KEYFILE_JSON}" ./
-if [ "$?" - ne 0 ];then
+if [ "$?" -ne "0" ];then
     echo "Failed to fetch access key to gcloud!"
     exit 1
 fi

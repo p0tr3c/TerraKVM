@@ -25,6 +25,12 @@ Resources:
         Version: 2012-10-17
         Statement:
           - Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:ssm:*:${AWS::AccountId}:parameter/terrakvm/*"
+          - Action:
               - s3:ListBucket
             Effect: Allow
             Resource:
