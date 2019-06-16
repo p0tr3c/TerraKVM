@@ -42,7 +42,7 @@ function pre_assert(){
   export KVM_GID=`getent group kvm | awk -F: '{print $3}'`
 
   if ! [ -z "$project" ]; then
-    PROJECT_ABS_PATH=`realpath $project`
+    PROJECT_ABS_PATH=`readlink -f $project`
     PROJECT_FILENAME=`basename $project`
   fi
 }
