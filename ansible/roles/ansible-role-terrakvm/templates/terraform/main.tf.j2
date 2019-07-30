@@ -161,18 +161,22 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
         dev = ["hd", "network"]
     {% endif %}
     }
-    {% if vm.distro == 'ubuntu' and not from_iso %}
-        {% raw %}
-    xml {
-        xslt = "${file("ubuntu_bug-1573095.xsl")}"
-    }
-        {% endraw %}
-    {% endif %}
     {% if vm.enable_console is defined and vm.enable_console %}
     console {
         type = "pty"
         target_port = "0"
         target_type = "serial"
+    }
+    {% endif %}
+    {% if vm.filesystem is defined %}
+    filesystem {
+        source = "{{ vm.filesystem.source }}"
+        target = "{{ vm.filesystem.target }}"
+        {% if vm.filesystem.readonly %}
+        readonly = true
+        {% else %}
+        readonly = false
+        {% endif %}
     }
     {% endif %}
 }
