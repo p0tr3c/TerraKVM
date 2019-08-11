@@ -158,3 +158,64 @@ You need to update it with the location of private key corresponding to prublic 
 
 The password access will only be granted via local console, for example via `virt-viewer`. 
 
+## Disk Size
+
+By default the VM will be provisioned with the size of `qcow` image downloaded from the net
+
+You can extend the size of the disk by specifing `size` variable in `vms` variable
+
+Unfortunately the `size` variable has to be provided in `bytes`.
+
+Sample project with growing disk:
+
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    disks:
+      - name: root
+        size: 21474836480
+    networks:
+      - network_name: default
+        external: true
+```
+
+## Multiple Disks
+
+You can have multiple disks in the VMs
+
+Simply add entry in `disks` list variable
+
+By default the additional disks will be based on the primary.
+
+You can change the source of the disk via `source` variable
+
+To get empty disk use `source: /dev/zero`
+
+Sample VM with two disks:
+
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    disks:
+      - name: root
+      - name: data
+        source: /dev/zero       
+        size: 21474836480
+    networks:
+      - network_name: default
+        external: true
+```
