@@ -17,10 +17,6 @@ Deploy VMs on [KVM](https://www.linux-kvm.org/page/Main_Page) via [docker](https
 5. SSH to VM by running `ssh -F dev.config dev`
 6. To remove VM run `sudo bash terrakvm destroy`
 
-# Motivation
-
-This project was created to allow me build test infrastructure on local KVM via transparent technologies.
-
 # How does it work?
 
 The project is a combination of ansible, terraform and jinja templates.
