@@ -219,3 +219,28 @@ vms:
       - network_name: default
         external: true
 ```
+
+## Serial Console
+
+By default VMs will not output to serial console, which is useful for debugging
+
+To enable serial console output add `enable_console: true` to `vms` variables
+
+Sample VM with serial console enabled
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    enable_console: true
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
+```
