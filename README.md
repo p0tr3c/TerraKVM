@@ -27,7 +27,7 @@ The project is a combination of ansible, terraform and jinja templates.
 
 The `terrakvm` shell script is a wrapper around docker-compose which executes the ansible playbook in `ansible/playbooks/` via docker container defined in `docker/`.
 
-Ansible playbook executes role `ansible/roles/ansible-role-terrakvm`. You need to know basics of ansible in order to read the role.
+Ansible playbook executes role `ansible/roles/ansible-role-terrakvm`.
 
 From high level point of view the role will template `terraform` configuration files via jinja2 templates.
 
@@ -49,24 +49,6 @@ This project is fairly simple, so just read the ansible playbooks/roles to under
 
 [Video](https://youtu.be/fOvAujaUREA) demonstration of the CentOS 7 x86_64 deployment
 > Note: the video is outdated
-
-# Implemented distros
-
-- CentOS 7 x86_64 (default)
-- Ubuntu Bionic x86_64 (`-e 'distro=ubuntu'`)
-- Ubuntu Bionic x86 (`-e 'distro=ubuntu' -e 'arch=x86'`)
-- Debian 9.7.0  x86_64 (`-e 'distro=debian'`)
-
-# Custom Images
-
-By default qcow2 images are downloaded from official distribution sites.
-
-Use `-e 'from_iso=true'` to build custom images via [packer](https://www.packer.io/)
-
-You can modify various variables in [vars.yml](ansible/default/vars.yml) to specify keyboard layout, language etc.
-
-More granular modification can be performed in [template.json.j2](ansible/templates/packer/template.json.j2).  
-This is where you can add provisioners
 
 # Requirements
 
