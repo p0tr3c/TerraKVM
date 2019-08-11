@@ -1,3 +1,7 @@
+- name: Wait for data sync
+  wait_for:
+    timeout: "{{ inner.gdbstub.wait }}"
+  when: inner.gdbstrub.wait is defined
 - name: Disable VM
   virt:
     command: destroy

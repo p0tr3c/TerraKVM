@@ -9,6 +9,8 @@ data "template_file" "{{ vm.vm_name }}_user_data" {
     template = <<EOF
       {% if vm.cloud_config is undefined %}
 #cloud-config
+runcmd:
+  - [ sync ]
 users:
   - name: $${ssh_user}
         {% if vm.passwd is defined and vm.passwd | length %}
