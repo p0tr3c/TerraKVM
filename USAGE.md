@@ -244,3 +244,32 @@ vms:
       - network_name: default
         external: true
 ```
+
+## Host file sharing
+
+File sharing is implemented with 9p, and depends on the VMs compatibility
+
+To enable file sharing add `filesystem` variable to `vms` spec, and sepcify source, target paths
+
+Sample vm with file sharing enabled:
+
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    filesystem:
+      source: /tmp
+      target: tmp
+      readonly: true
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
+```
