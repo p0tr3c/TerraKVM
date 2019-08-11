@@ -251,6 +251,8 @@ File sharing is implemented with 9p, and depends on the VMs compatibility
 
 To enable file sharing add `filesystem` variable to `vms` spec, and sepcify source, target paths
 
+You can then mount the share in the guest via `mount -t 9p -o trans=virtio,version=9p2000.L,rw <target> /mnt/tmp`
+
 Sample vm with file sharing enabled:
 
 ```
