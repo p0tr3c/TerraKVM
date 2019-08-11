@@ -72,3 +72,41 @@ The project spec file will be mounted by docker based on the absolute paths.
 
 This allows the project files to be located anywhere on the host filesystem.
 
+# Features
+
+## Multiple VMs
+
+You can deploy multiple vms in single project.
+
+`vms` variable is a list of vm spec. 
+
+Simply add another item in the list to deploy multiple vms.
+
+```
+vms:
+  - hostname: vm_1
+    vm_name: vm_1
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
+  - hostname: vm_2
+    vm_name: vm_2
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
+```
+
