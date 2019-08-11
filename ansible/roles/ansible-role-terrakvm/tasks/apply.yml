@@ -1,3 +1,15 @@
+- name: Assert Volume Pools
+  block:
+    - virt_pool:
+        command: list_pools
+      register: volume_pool_list
+    - assert:
+        that:
+          - volume_pool_list.list_pools | length > 0
+        fail_msg: You need to have at least 1 volume pool preconfigured
+  tags:
+    - always
+
 - name: Create project directory
   file:
     path: "{{ terraform_dir }}"
