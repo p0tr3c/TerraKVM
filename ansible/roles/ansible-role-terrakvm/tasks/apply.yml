@@ -52,7 +52,6 @@
     - { name: "network.tf" }
     - { name: "vars.tf" }
     - { name: "terraform.tfvars" }
-    - { name: "ubuntu_bug-1573095.xsl" }
     - { name: "output.tf" }
     - { name: "inventory.tpl"}
 
