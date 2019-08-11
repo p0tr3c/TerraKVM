@@ -75,6 +75,23 @@ function do_build(){
   docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/build.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
 }
 
+function do_preconfig(){
+  cat > ./default.xml <<EOF
+<pool type="dir">
+  <name>default</name>
+  <target>
+    <path>/var/lib/libvirt/images</path>
+  </target>
+</pool>
+EOF
+  virsh --connect qemu:///system pool-define ./default.xml 2>/dev/null && rm -rf ./default.xml
+  virsh --connect qemu:///system pool-start default  2>/dev/null
+  virsh --connect qemu:///system pool-autostart default 2>/dev/null
+
+  virsh --connect qemu:///system net-start default 2>/dev/null
+  virsh --connect qemu:///system net-autostart default 2>/dev/null
+}
+
 function main(){
   project=""
   while getopts ":h" opt; do
@@ -97,6 +114,9 @@ function main(){
 
   subcommand=$1; shift
   case "$subcommand" in
+    preconfig)
+      do_preconfig $@
+      ;;
     apply)
       do_apply $@
       ;;
