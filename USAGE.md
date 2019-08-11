@@ -74,6 +74,16 @@ This allows the project files to be located anywhere on the host filesystem.
 
 # Features
 
+## Project vs VM variables
+
+Information in this doc will refere to `project` and `vm` variables.
+
+Some variables are global to the `project`, for example `project_name` or `ssh_username`
+
+These variables are defined outside of `vms` list.
+
+`vm` variable refers to information specific to individual vms. For example `hostname` or `ncpu`
+
 ## Multiple VMs
 
 You can deploy multiple vms in single project.
@@ -109,4 +119,42 @@ vms:
       - network_name: default
         external: true
 ```
+
+## Access Creds
+
+Terrakvm uses `cloudinit` to preconfigure the VMs with access credentials
+
+You can specify `username`, `password`, and `ssh key` to access the VMs
+
+By default only `ssh key` access is configured. The terrakvm creates a key per project.
+
+You can provide custom key via `ssh_public_key` project variable.
+
+Sample project with custom username, enabled password and custom ssh key:
+
+```
+project_name: full_access
+ssh_username: eve
+ssh_public_key: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCZ1FDM0ljaVg1L1VSYkN2UlhKUWQxZCtPeXRaV0FrUml4SDBFMFQ0bUpDeDVDMVJ1N0NVRGZDSmovSHV0TmttNm1xcmx1bHRpNjlqWkxGRHNBVFlYNjNtdUZQZnZMMzMrelpLZmtlTTR1dnMyM0NGY0RYUVdFMUx3cVRqc29VTitJNG0zaUtaem5Xa3lRZDVOVUdJZ29GK0dnZkswOFNzN0JvWXdlRFYwbWtmMDVranJ1bm1LakhvNS9PUGxoMW5yaDJiZDRXdWYyZDJwbEFnR0RtVEZRNXh0alZzMWI2dEZOU25Fd04rTGQrQ21GT2prSzBzNW5XaHN0cjZCVDVZMUNtdFpMMWFYWHRYVVd3dk1lWHU3clhGZk1udUdudjRUa3I1c3NEWGQzMlAyeHpLWXBVWGdxRlRYOHJLWEVsN3RWM0x6dDZWYlpEblZpT0JLa09nUFZTazltSnFvQWlJQTZhTS9qVTRjV09sOWM1Z1RlRGxldSsxbjVtRThvaWRvdTVIdU1yRENoSFIxSmdqZ1FUYWloV0hoK2EyNUljTEJza0ZVNVh5TjI5Nk5JUDZQQys2WDZSeFVocGFubmNXS2YyL1JyY1BNNEE3TjBtd2ZxSUtGMnFFa3RIZzl3ancxRVc3TklNZ1hXQWsvWm5hQ3ZpTWsvc3JaWXhuSVFyUzEyV2M9IHAwdHIzY0Bwd25ib3guYWR2ZXJzYXJpYWxlbmdpbmVlcmluZy5jb20=
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    passwd: $6$Vfcr/tJ7hSufLBnI$jxhPbnsNT/QpDq.vp2tidL.vDz6PsKHedpxVaCzbbwMcqJO7FZvtU3PgdzD/mrSva.eoUV5K9ejVUh90LI8qZ.
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
+```
+
+The `config` ssh file created by above project will be incorrect. It will point to incorrect private key.
+
+You need to update it with the location of private key corresponding to prublic key in the project.
+
+The password access will only be granted via local console, for example via `virt-viewer`. 
 
