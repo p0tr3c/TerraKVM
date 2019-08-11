@@ -13,9 +13,11 @@ Deploy VMs on [KVM](https://www.linux-kvm.org/page/Main_Page) via [docker](https
 1. Install libvirt [[1](https://wiki.archlinux.org/index.php/libvirt)],[[2](https://help.ubuntu.com/community/KVM/Installation)],[[3](https://www.linuxtechi.com/install-kvm-hypervisor-on-centos-7-and-rhel-7/)], [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) on the host
 2. `cd TerraKVM`
 3. Clone [TerraKVM](https://github.com/p0tr3c/TerraKVM)
-4. Deploy VM by running `sudo bash terrakvm apply`
+4. Per distribution:
+   a. Arch Linux: Run `sudo ./terrakvm preconfig` to create default pool, and activate default network
+4. Deploy VM by running `sudo ./terrakvm apply`
 5. SSH to VM by running `ssh -F dev.config dev`
-6. To remove VM run `sudo bash terrakvm destroy`
+6. To remove VM run `sudo ./terrakvm destroy`
 
 # How does it work?
 
