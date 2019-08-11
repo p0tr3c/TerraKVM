@@ -43,8 +43,6 @@ As terraform utilizes state files to maintain state of the infrastructure, the p
 
 To destroy the infrastructure run `terrakvm` with destroy flag.
 
-This project is fairly simple, so just read the ansible playbooks/roles to understand the flow of execution in more detail. 
-
 # Demo
 
 [Video](https://youtu.be/fOvAujaUREA) demonstration of the CentOS 7 x86_64 deployment
