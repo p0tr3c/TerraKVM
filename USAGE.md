@@ -275,3 +275,29 @@ vms:
       - network_name: default
         external: true
 ```
+
+## GDB Stub Support
+
+You can enable GDB stub on each VM
+
+Specify `gdbstub` vm variable and provide unique available network port
+
+Sample project with GDB enabled
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    from_iso: false
+    distro: fedora29
+    arch: amd64
+    ncpu: 2
+    memory: 4096
+    gdbstub:
+      port: 1234
+    disks:
+      - name: root
+    networks:
+      - network_name: default
+        external: true
+```
