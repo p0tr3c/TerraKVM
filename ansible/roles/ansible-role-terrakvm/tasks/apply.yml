@@ -68,14 +68,16 @@
     force_init: true
   register: terraform_output
 
-- name: Enable GDB
-  include_tasks: 
-    file: enable_gdb.yml
+- name: Edit VM
+  include_tasks:
+    file: edit_xml.yml
   loop: "{{ vms }}"
   loop_control:
     loop_var: inner
-  when: inner.gdbstub is defined
-
+  when:
+    - inner.gdbstub is defined
+    - inner.console is defined
+  
 - name: Create ssh config
   template:
     src: terraform/ssh_config

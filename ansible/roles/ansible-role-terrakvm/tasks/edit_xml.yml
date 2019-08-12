@@ -1,0 +1,46 @@
+- name: Wait for data sync
+  wait_for:
+    timeout: "{{ inner.sync_wait }}"
+  when: inner.sync_wait is defined
+- name: Disable VM
+  virt:
+    command: destroy
+    name: "{{ inner.vm_name }}"
+- name: Dump XML
+  virt:
+    command: get_xml
+    name: "{{ inner.vm_name }}"
+  register: vm_xml_content
+- name: Create temp file
+  tempfile:
+    state: file
+    suffix: "{{ inner.vm_name }}.xml"
+  register: vm_temp_file
+- name: Store in file
+  copy:
+    dest: "{{ vm_temp_file.path }}"
+    content: "{{ vm_xml_content.get_xml }}"
+
+- name: Enable GDB
+  include_tasks:
+    file: enable_gdb.yml
+  when: inner.gdbstub is defined
+
+- name: Enable Console to File
+  include_tasks:
+    file: enable_console.yml
+  when: inner.console is defined
+
+- name: Reconfigure VM
+  virt:
+    command: define
+    xml: "{{ lookup('file', vm_temp_file.path) }}"
+- name: Restart VM
+  virt:
+    command: start
+    name: "{{ inner.vm_name }}"
+- name: Delete temp file
+  file:
+    path: "{{ vm_temp_file.path }}"
+    state: absent
+

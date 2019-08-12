@@ -1,0 +1,28 @@
+- name: Check if console is enabled
+  set_fact:
+    console_is_enabled: "{{ lookup('file', vm_temp_file.path ) | regex_search('<serial type=.file.>') }}"
+- name: Enable console
+  block:
+    - name: Setup Console config
+      set_fact:
+        console_config: |
+           <serial type='file'>
+             <source path='{{ inner.console.dest_file }}'/>
+             <target port='0'/>
+           </serial>
+           <console type='file'>
+             <source path='{{ inner.console.dest_file }}'/>
+             <target type='serial' port='0'/>
+           </console>
+    - name: Add console template
+      lineinfile:
+        path: "{{ vm_temp_file.path }}"
+        insertbefore: "<\/devices>"
+        regexp: "{{ '{{' }} console_config {{ '}}' }}"
+        line: "{{ '{{' }} console_config {{ '}}' }}"
+    - name: Template console config
+      template:
+        src: "{{ vm_temp_file.path }}"
+        dest: "{{ vm_temp_file.path }}"
+  when: (console_is_enabled | length) == 0
+
