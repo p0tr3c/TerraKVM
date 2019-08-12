@@ -224,7 +224,7 @@ vms:
 
 By default VMs will not output to serial console, which is useful for debugging
 
-To enable serial console output add `enable_console: true` to `vms` variables
+To enable serial console output add `console` to `vms` variables
 
 Sample VM with serial console enabled
 ```
@@ -237,7 +237,8 @@ vms:
     arch: amd64
     ncpu: 2
     memory: 4096
-    enable_console: true
+    console:
+      dest_file: /tmp/serial.log
     disks:
       - name: root
     networks:
@@ -301,3 +302,4 @@ vms:
       - network_name: default
         external: true
 ```
+
