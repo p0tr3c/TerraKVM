@@ -17,7 +17,6 @@ memory: 2048
 vms:
   - hostname: "{{ hostname }}"
     vm_name: "{{ vm_name }}"
-    from_iso: "{{ from_iso }}"
     distro: "{{ distro }}"
     arch: "{{ arch }}"
     ncpu: "{{ ncpu }}"
@@ -46,7 +45,6 @@ project_name: terrakvm
 vms:
   - hostname: terrakvm
     vm_name: terrakvm
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -96,7 +94,6 @@ Simply add another item in the list to deploy multiple vms.
 vms:
   - hostname: vm_1
     vm_name: vm_1
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -108,7 +105,6 @@ vms:
         external: true
   - hostname: vm_2
     vm_name: vm_2
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -139,7 +135,6 @@ ssh_public_key: c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCZ1FDM0ljaVg1L1VS
 vms:
   - hostname: terrakvm
     vm_name: terrakvm
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -173,7 +168,6 @@ project_name: terrakvm
 vms:
   - hostname: terrakvm
     vm_name: terrakvm
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -205,7 +199,6 @@ project_name: terrakvm
 vms:
   - hostname: terrakvm
     vm_name: terrakvm
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -232,7 +225,6 @@ project_name: terrakvm
 vms:
   - hostname: terrakvm
     vm_name: terrakvm
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -261,7 +253,6 @@ project_name: terrakvm
 vms:
   - hostname: terrakvm
     vm_name: terrakvm
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -289,7 +280,6 @@ project_name: terrakvm
 vms:
   - hostname: terrakvm
     vm_name: terrakvm
-    from_iso: false
     distro: fedora29
     arch: amd64
     ncpu: 2
@@ -303,3 +293,86 @@ vms:
         external: true
 ```
 
+## Boot from ISO
+
+### Built-in images
+
+You can create VM with ISO image
+
+Specify boot method as `method: iso` and set `wait_for_ip: false`
+
+The ISO boot won't configure any SSH access, so you have to use  
+`virt-viewer` to access the VM
+
+For list of built-in images view [main.yml](ansible/roles/ansible-role-terrakvm/defaults/main.yml)
+
+Sample project to boot from Arch Linux ISO
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    method: iso
+    wait_for_ip: false
+    distro: arch
+    arch: amd64
+    disks:
+      - name: boot
+        type: iso
+    networks:
+      - network_name: default
+        external: true
+```
+
+### Custom ISO
+
+You can specify the source of ISO by adding `iso` vm variable
+
+Make sure the `dest` parameter is writeable, and reachable to `kvm`
+
+You can use `elevate` flag to run write with `root` perms
+
+Sample project to download and boot from custom ISO
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    method: iso
+    iso:
+      url: http://mirrors.edge.kernel.org/archlinux/iso/latest/archlinux-2019.08.01-x86_64.iso
+      dest: /var/lib/libvirt/images/archlinux-2019.08.01-x86_64.iso
+      checksum: sha256:e3d9cea98c03996ee3ce5d2d995aed495eae77c670721bb62ad25530fa175d1d
+      elevate: true
+    wait_for_ip: false
+    distro: arch
+    arch: amd64
+    disks:
+      - name: boot
+        type: iso
+    networks:
+      - network_name: default
+        external: true
+```
+
+If you don't want to download the ISO, rather use local filesystem  
+then simply add `source` parameter in boot disk
+
+Sample project with localy sourced ISO:
+```
+project_name: terrakvm
+vms:
+  - hostname: terrakvm
+    vm_name: terrakvm
+    method: iso
+    wait_for_ip: false
+    distro: arch-custom
+    arch: amd64
+    disks:
+      - name: boot
+        type: iso
+        source: /var/lib/libvirt/images/archlinux-2019.08.01-x86_64.iso
+    networks:
+      - network_name: default
+        external: true
+```

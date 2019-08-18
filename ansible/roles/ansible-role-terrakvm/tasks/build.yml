@@ -1,37 +1,73 @@
+- name: Include build variables
+  include_tasks: packer.yml
+
 - name: Set output directory
   set_fact:
-    output_directory: "{{ build_item.distro }}_{{ build_item.arch }}"
+    output_directory: "output"
 
-- name: Copy provisioning playbook
-  copy:
-    src: "{{ ansible_dir }}/{{ build_item.packer_provisioning }}"
-    dest: "{{ packer_dir }}/{{ build_item.packer_provisioning }}"
-  when: build_item.packer_provisioning is defined
+- name: Create project directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0700
+  loop:
+    - "{{ packer_dir }}"
+    - "{{ packer_dir }}/{{ build_item.vm_name }}"
+    - "{{ packer_dir }}/{{ build_item.vm_name }}/{{ scripts_directory }}"
+    - "{{ packer_dir }}/{{ build_item.vm_name }}/{{ http_directory}}"
+  tags:
+    - always
+
+- name: Create SSH key
+  block:
+    - command: ssh-keygen -f "{{ packer_dir }}/{{ project_name}}.pkey" -N ""
+      args:
+        creates: "{{ packer_dir }}/{{ project_name }}.pkey"
+    - set_fact:
+          ssh_public_key: "{{ lookup('file',  packer_dir + '/' + project_name  + '.pkey.pub') | b64encode }}"
+  when: ssh_public_key is undefined
+
+  # - name: Copy provisioning playbook
+  #   copy:
+  #     src: "{{ ansible_dir }}/{{ build_item.packer_provisioning }}"
+  #     dest: "{{ packer_dir }}/{{ build_item.packer_provisioning }}"
+  #   when: build_item.packer_provisioning is defined
 
 - name: Template packer instructions
   template:
-    src: "packer/{{ item.name }}.j2"
-    dest: "{{ packer_dir }}/{{ item.name }}"
+    src: "packer/{{ item.src }}/{{ item.name }}.j2"
+    dest: "{{ item.dest }}/{{ item.name }}"
   vars:
-    vm_name: "image.qcow2"
+    iso_url: "{{ build_item.packer.iso_url }}"
+    iso_checksum_url: "{{ build_item.packer.iso_checksum_url }}"
+    iso_checksum_type: "{{ build_item.packer.iso_checksum_type }}"
+    ssh_username: "{{ build_item.ssh_username }}"
+    ssh_password: "{{ build_item.ssh_password }}"
+    vm_name: "{{ build_item.vm_name }}"
     distro: "{{ build_item.distro }}"
-    packer_provisioning: "{{ build_item.packer_provisioning | default('') }}"
+    packer_provisioning: "{{ build_item.packer.ansible | default('') }}"
+    hostname: "{{ build_item.hostname }}"
   when: build_item.distro in item.distro
   with_items:
-    - { name: "template.json", distro: ["centos", "ubuntu"] }
-    - { name: "kickstart.ks", distro: ["centos"] }
-    - { name: "variables.json", distro: ["centos", "ubuntu"] }
-    - { name: "99-cloudinit.cfg", distro: ["centos", "ubuntu"] }
-    - { name: "preseed", distro: ["ubuntu"] }
+    - { name: "template.json", src: "",  dest: "{{ packer_dir }}/{{ build_item.vm_name }}", distro: ["arch", "centos", "ubuntu"] }
+    - { name: "variables.json", src: "", dest: "{{ packer_dir }}/{{ build_item.vm_name }}", distro: ["arch", "centos", "ubuntu"] }
+    - { name: "install-base.sh", src: "scripts", dest: "{{ packer_dir }}/{{ build_item.vm_name }}/{{ scripts_directory }}", distro: ["arch"] }
+    - { name: "cleanup.sh", src: "scripts", dest: "{{ packer_dir }}/{{ build_item.vm_name }}/{{ scripts_directory }}", distro: ["arch"] } 
+    - { name: "kickstart.ks", src: "http", dest: "{{ packer_dir }}/{{ build_item.vm_name }}/{{ http_directory }}", distro: ["centos"] }
+    - { name: "99-cloudinit.cfg", src: "http", dest: "{{ packer_dir }}/{{ build_item.vm_name }}/{{ http_directory }}", distro: ["centos", "ubuntu"] }
+    - { name: "preseed", src: "http", dest: "{{ packer_dir }}/{{ build_item.vm_name }}/{{ http_directory }}", distro: ["ubuntu"] }
+    - { name: "enable-ssh.sh", src: "http", dest: "{{ packer_dir }}/{{ build_item.vm_name }}/{{ http_directory }}", distro: ["arch"] }
+    - { name: "poweroff.timer", src: "http", dest: "{{ packer_dir }}/{{ build_item.vm_name }}/{{ http_directory }}", distro: ["arch"] } 
 
 - name: Execute build
   command: packer build -var-file=variables.json template.json
   args:
-    chdir: "{{ packer_dir }}"
-    creates: "{{ output_directory }}/image.qcow2"
+    chdir: "{{ packer_dir }}/{{ build_item.vm_name }}"
+    creates: "{{ output_directory }}"
   environment:
     PACKER_LOG: 1
-    PACKER_LOG_PATH: "{{ build_item.distro }}_{{ build_item.arch }}.log"
+    PACKER_LOG_PATH: "{{ build_item.vm_name }}.log"
+    PACKER_CACHE_DIR: "{{ packer_cache_dir }}"
   when: build_item.force_build is not defined or not build_item.force_build
 
 - name: Execute build
@@ -46,5 +82,5 @@
         chdir: "{{ packer_dir }}"
       environment:
         PACKER_LOG: 1
-        PACKER_LOG_PATH: "{{ build_item.distro }}_{{ build_item.arch }}.log"
+        PACKER_LOG_PATH: "{{ build_item.vm_name }}.log"
   when: build_item.force_build is defined and build_item.force_build

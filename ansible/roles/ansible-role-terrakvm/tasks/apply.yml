@@ -25,11 +25,11 @@
         creates: "{{ terraform_dir }}/{{ project_name }}.pkey"
     - set_fact:
           ssh_public_key: "{{ lookup('file',  terraform_dir + '/' + project_name  + '.pkey.pub') | b64encode }}"
-  when: ssh_public_key is undefined
+  when: ssh_public_key | length == 0
 
 - name: Create download dir
   file:
-    path: "{{ packer_dir }}/build"
+    path: "{{ download_cache_dir }}"
     state: directory
     mode: 0770
 
@@ -40,8 +40,20 @@
     mode: 0660
     checksum: "{{ cloud_images | json_query(download_filter) | json_query('[*].checksum') | join('') }}"
   with_items: "{{ vms }}"
-  when: item.download_cloudimage | default('true')
+  when: item.method is undefined or item.method == "cloud"
   tags: download_cloud_image
+
+- name: Build images via packer
+  include_tasks: build.yml
+  loop: "{{ vms }}"
+  loop_control:
+    loop_var: build_item
+  when: build_item.method is defined and build_item.method == "packer"
+
+- name: Prepare ISO file
+  include_tasks: iso.yml 
+  loop: "{{ vms }}"
+  when: item.method is defined and item.method == "iso"
 
 - name: Template terraform instructions
   template:

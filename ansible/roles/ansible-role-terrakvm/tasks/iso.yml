@@ -1,0 +1,19 @@
+- name: Download from custom source
+  include_tasks: iso_download.yml
+  vars:
+    iso_source_url: "{{ item.iso.url }}"
+    iso_source_checksum: "{{ item.iso.checksum }}"
+    iso_dest_path: "{{ item.iso.dest }}"
+    write_elevation: "{{ item.iso.elevate }}"
+    iso_virt_source: "{{ item.iso.virt_source | default(item.iso.dest) }}"
+  when: item.iso is defined
+
+- name: Download from known sources
+  include_tasks: iso_download.yml
+  vars:
+    iso_source_url: "{{ iso_images | json_query(download_filter) | json_query('[*].url') | join('') }}"
+    iso_source_checksum: "{{ iso_images | json_query(download_filter) | json_query('[*].checksum') | join('') }}"
+    iso_dest_path: "{{ download_cache_dir }}/{{ iso_images | json_query(download_filter) | json_query('[*].iso_name') | join('') }}"
+    iso_virt_source: "{{ iso_images | json_query(download_filter) | json_query('[*].virt_source') | join('') }}"
+    write_elevation: true
+  when: item.iso is undefined and (iso_images | json_query(download_filter) | length > 0)

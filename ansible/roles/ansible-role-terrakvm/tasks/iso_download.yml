@@ -1,0 +1,56 @@
+- name: Without Elevated
+  block:
+    - name: Check Destination Permissions
+      stat:
+        path: "{{ iso_dest_path | dirname }}"
+      register: iso_dest_stat
+    - name: Assert that path exists
+      assert:
+        that:
+          - iso_dest_stat.stat.exists
+        fail_msg: "Path {{ iso_dest_path | dirname }} does not exist"
+    - name: Assert that path is writeable
+      assert:
+        that:
+          - iso_dest_stat.stat.writeable
+        fail_msg: "Path {{ iso_dest_path | dirname }} is not writeable"
+    - name: Download ISO
+      get_url:
+        url: "{{ iso_source_url  }}"
+        dest: "{{ iso_dest_path }}"
+        checksum: "{{ iso_source_checksum }}"
+    - name: Copy to virt source
+      copy:
+        src: "{{ iso_dest_path }}"
+        dest: "{{ iso_virt_source }}"
+  when: write_elevation is undefined or not write_elevation
+
+- name: With Elevated
+  block:
+    - name: Check Destination Permissions
+      stat:
+        path: "{{ iso_dest_path | dirname }}"
+      register: iso_dest_stat
+    - name: Assert that path exists
+      assert:
+        that:
+          - iso_dest_stat.stat.exists
+        fail_msg: "Path {{ iso_dest_path | dirname }} does not exist"
+    - name: Assert that path is writeable
+      assert:
+        that:
+          - iso_dest_stat.stat.writeable
+        fail_msg: "Path {{ iso_dest_path | dirname }} is not writeable"
+    - name: Download ISO
+      get_url:
+        url: "{{ iso_source_url  }}"
+        dest: "{{ iso_dest_path }}"
+        checksum: "{{ iso_source_checksum }}"
+    - name: Copy to virt source
+      copy:
+        src: "{{ iso_dest_path }}"
+        dest: "{{ iso_virt_source }}"
+  become: true
+  when: write_elevation is defined and write_elevation
+
+ 

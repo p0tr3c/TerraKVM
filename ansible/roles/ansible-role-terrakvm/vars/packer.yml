@@ -1,0 +1,13 @@
+__force_build: false
+
+# Build vars
+#
+# Centos Specific
+__mirror_address: http://mirrorlist.centos.org/
+__lang: en
+__keyboard: uk
+__timezone: Europe/London
+__rootpw_hash: $6$zVpPUfbfdA51Cmv1$xA85XkZY4WPnIpMUuPn6LL5mFsnf4EjQO0EDZJOKBRjcIA6ooiVF2Fr3RJQj.k52EHvMk2Ra9XNojPyYPKWNX.
+
+# Packer variables
+__packer_enable_cloudinit: true

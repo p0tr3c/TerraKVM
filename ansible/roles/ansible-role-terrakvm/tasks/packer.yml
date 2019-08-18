@@ -1,0 +1,31 @@
+- name: Include default vars
+  include_vars: packer.yml
+
+- set_fact:
+    force_build: "{{ __force_build }}"
+  when: force_build is undefined
+
+- set_fact:
+    mirror_address: "{{ __mirror_address }}"
+  when: mirror_address is undefined
+
+- set_fact:
+    lang: "{{ __lang }}"
+  when: lang is undefined
+
+- set_fact:
+    keyboard: "{{ __keyboard }}"
+  when: keyboard is undefined
+
+- set_fact:
+    timezone: "{{ __timezone }}"
+  when: timezone is undefined
+
+- set_fact:
+    rootpw_hash: "{{ __rootpw_hash }}"
+  when: rootpw_hash is undefined
+
+- set_fact:
+    packer_enable_cloudinit: "{{ __packer_enable_cloudinit }}"
+  when: packer_enable_cloudinit is undefined
+
