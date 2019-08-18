@@ -304,7 +304,7 @@ Specify boot method as `method: iso` and set `wait_for_ip: false`
 The ISO boot won't configure any SSH access, so you have to use  
 `virt-viewer` to access the VM
 
-For list of built-in images view [main.yml](ansible/roles/ansible-role-terrakvm/defaults/main.yml)
+For list of built-in images view [main.yml](ansible/roles/ansible-role-terrakvm/vars/main.yml)
 
 Sample project to boot from Arch Linux ISO
 ```
