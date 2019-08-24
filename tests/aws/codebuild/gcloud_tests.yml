@@ -23,9 +23,13 @@ phases:
       - terraform init -backend-config "bucket=$TF_ENV_tf_state_bucket" -backend-config "region=$TF_ENV_aws_region" -backend-config "key=$TF_ENV_state_key"
       - terraform plan -out=tfplan
       - terraform apply tfplan
+      - gcloud auth activate-service-account --key-file "$GCLOUD_KEYFILE_JSON" --project "$GOOGLE_PROJECT"
+      - gcloud compute config-ssh
   build:
     commands:
-      - echo "Execute distributed tests here"
+      - cd "$CODEBUILD_SRC_DIR"
+      - cd tests/ansible
+      - ansible -m ping -i inventory/terrakvm.gcp.yml all
   post_build:
     commands:
       - cd "$CODEBUILD_SRC_DIR"

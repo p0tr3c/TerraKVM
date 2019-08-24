@@ -12,4 +12,4 @@ if [ "$?" -ne "0" ];then
     echo "Failed to fetch access key to gcloud!"
     exit 1
 fi
-
+export GCP_SERVICE_ACCOUNT_FILE="`pwd`/$GCLOUD_KEYFILE_JSON"

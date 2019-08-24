@@ -1,0 +1,8 @@
+plugin: gcp_compute
+auth_kind: serviceaccount
+projects:
+  - terrakvmtest
+hostnames:
+  - name
+compose:
+  ansible_host: name + "." +  zone + "." + project
