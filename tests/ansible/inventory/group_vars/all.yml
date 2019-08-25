@@ -4,9 +4,10 @@ state_bucket_name: terrakvm
 gce_state_file_key: terrakvm_tests_on_gce.tfstate
 gce_service_account_access_file: terrakvm.json
 gce_compute_zone: europe-west2-a
-gce_project: terrakvm
+gce_project: terrakvmtest
 gce_region: eu-west-2 
 gce_service_account_access_file_src: ""
+test_on_gce_project_name: TerraKVMGCloudInvokeTests
 aws_ssm_parameters:
   - name: /terrakvm/tf_state_bucket
     value: "{{ state_bucket_name }}-{{ aws_region }}-{{ aws_facts.account }}"
