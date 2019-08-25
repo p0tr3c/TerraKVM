@@ -7,4 +7,27 @@ gce_compute_zone: europe-west2-a
 gce_project: terrakvm
 gce_region: eu-west-2 
 gce_service_account_access_file_src: ""
+aws_ssm_parameters:
+  - name: /terrakvm/tf_state_bucket
+    value: "{{ state_bucket_name }}-{{ aws_region }}-{{ aws_facts.account }}"
+    region: "{{ aws_region }}" 
+  - name: /terrakvm/aws_region
+    value: "{{ aws_region }}"
+    region: "{{ aws_region }}"
+  - name: /terrakvm/gce_state_file_key
+    value: "{{ gce_state_file_key }}"
+    region: "{{ aws_region }}"
+  - name: /terrakvm/gce_service_account_access_file
+    value: "{{ gce_service_account_access_file }}"
+    region: "{{ aws_region }}"
+  - name: /terrakvm/gce_compute_zone
+    value: "{{ gce_compute_zone }}"
+    region: "{{ aws_region }}"
+  - name: /terrakvm/gce_project
+    value: "{{ gce_project }}"
+    region: "{{ aws_region }}"
+  - name: /terrakvm/gce_region
+    value: "{{ gce_region }}"
+    region: "{{ aws_region }}"
+
 

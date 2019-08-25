@@ -7,27 +7,20 @@
       register: aws_facts
       tags:
         - always
-    - name: Upload config to SSM
+    - name: Clear SSM
       aws_ssm_parameter_store:
         name: "{{ item.name }}"
-        value: "{{ item.value }}"
-        description: "Deployment Region"
+        state: absent
         region: "{{ item.region }}"
       loop: "{{ aws_ssm_parameters }}"
-    - name: Deploy Cloudformation
+    - name: Destroy Cloudformation
       cloudformation:
         stack_name: TerraKVMTestGCE
-        state: present
+        state: absent
         region: "{{ aws_region }}"
         disable_rollback: true
         template: "{{ repo_root }}/tests/aws/cloudformation/codebuild_test_on_gce.yaml" 
         template_parameters:
           StateBucketStackName: TerraKVMTestStateBucket
-    - name: Upload access file
-      aws_s3:
-        bucket: "{{ state_bucket_name }}-{{ aws_region }}-{{ aws_facts.account }}"
-        object: "{{ gce_service_account_access_file }}"
-        src: "{{ gce_service_account_access_file_src }}"
-        mode: put
 
         
