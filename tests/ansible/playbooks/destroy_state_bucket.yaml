@@ -1,0 +1,22 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Get AWS facts
+      aws_caller_facts:
+      register: aws_facts
+      tags:
+        - always
+    - name: Clear state bucket data
+      s3_bucket:
+        name: "{{ state_bucket_name }}-{{ aws_region }}-{{ aws_facts.account }}"
+        force: true
+        state: absent
+    - name: Destroy Cloudformation
+      cloudformation:
+        stack_name: TerraKVMTestStateBucket
+        state: absent
+        region: "{{ aws_region }}"
+        disable_rollback: true
+        template: "{{ repo_root }}/tests/aws/cloudformation/s3_test_state_bucket.yaml" 
+        

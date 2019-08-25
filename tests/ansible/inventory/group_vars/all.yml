@@ -1,3 +1,10 @@
 aws_region: eu-west-1
 repo_root: /mnt/data/Github/TerraKVM
+state_bucket_name: terrakvm
+gce_state_file_key: terrakvm_tests_on_gce.tfstate
+gce_service_account_access_file: terrakvm.json
+gce_compute_zone: europe-west2-a
+gce_project: terrakvm
+gce_region: eu-west-2 
+gce_service_account_access_file_src: ""
 

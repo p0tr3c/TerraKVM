@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create shared bucket for test states
+Parameters:
+  StateBucketName:
+    Type: String
+    Default: terrakvm
+    Description: State S3 BucketName
+Resources:
+  TestStateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Sub ${StateBucketName}-${AWS::Region}-${AWS::AccountId}
+      VersioningConfiguration:
+        Status:  Enabled 
+  StateBucketPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub TerraKVM-${StateBucketName}-RW-Policy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - s3:ListBucket
+            Effect: Allow
+            Resource:
+              - !GetAtt TestStateBucket.Arn
+          - Action:
+              - s3:PutObject
+              - s3:GetObject
+            Effect: Allow
+            Resource:
+              - !Join
+                 - ''
+                 - - !GetAtt TestStateBucket.Arn
+                   - '/*'
+Outputs:
+  StateBucketPolicy:
+    Value: !Ref StateBucketPolicy
+    Export:
+      Name: !Sub ${AWS::StackName}-StateBucketPolicy

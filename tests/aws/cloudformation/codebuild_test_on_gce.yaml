@@ -5,18 +5,11 @@ Parameters:
     Type: String
     Default: aws/codebuild/docker:17.09.0
     Description: Docker Image used by CodeBuild
-  ArtifactBucketName:
+  StateBucketStackName:
     Type: String
-    Default: terrakvm
-    Description: Artifact S3 BucketName
+    Description: Name of the stack to import RW Policy ARN
+    Default: TerraKVMTestStateBucket
 Resources:
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      AccessControl: Private
-      BucketName: !Sub ${ArtifactBucketName}-${AWS::Region}-${AWS::AccountId}
-      VersioningConfiguration:
-        Status: Enabled
   TerraKVMGCloudBuildPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -30,20 +23,6 @@ Resources:
             Effect: Allow
             Resource:
               - !Sub "arn:aws:ssm:*:${AWS::AccountId}:parameter/terrakvm/*"
-          - Action:
-              - s3:ListBucket
-            Effect: Allow
-            Resource:
-              - !GetAtt ArtifactBucket.Arn
-          - Action:
-              - s3:PutObject
-              - s3:GetObject
-            Effect: Allow
-            Resource:
-              - !Join
-                 - ''
-                 - - !GetAtt ArtifactBucket.Arn
-                   - '/*'
           - Action:
               - logs:CreateLogGroup
               - logs:CreateLogStream
@@ -64,6 +43,8 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - !Ref TerraKVMGCloudBuildPolicy
+        - Fn::ImportValue:
+            !Sub "${StateBucketStackName}-StateBucketPolicy"
   InvokeTerraKVMGCloudTests:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -77,7 +58,7 @@ Resources:
         Image: !Ref DockerBuildImage
         Type: LINUX_CONTAINER
       Source:
-        BuildSpec: tests/aws/codebuild/gcloud_tests.yml
+        BuildSpec: tests/aws/codebuild/gce_buildspec.yaml
         Location: https://github.com/p0tr3c/TerraKVM.git
         ReportBuildStatus: True
         Type: GITHUB

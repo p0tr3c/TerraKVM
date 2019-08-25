@@ -46,7 +46,7 @@ Resources:
         Image: !Ref DockerBuildImage
         Type: LINUX_CONTAINER
       Source:
-        BuildSpec: tests/aws/codebuild/buildspec.yml
+        BuildSpec: tests/aws/codebuild/aws_buildspec.yaml
         Location: https://github.com/p0tr3c/TerraKVM.git
         ReportBuildStatus: True
         Type: GITHUB

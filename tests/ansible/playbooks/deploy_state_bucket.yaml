@@ -1,0 +1,14 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Deploy Cloudformation
+      cloudformation:
+        stack_name: TerraKVMTestStateBucket
+        state: present
+        region: "{{ aws_region }}"
+        disable_rollback: true
+        template: "{{ repo_root }}/tests/aws/cloudformation/s3_test_state_bucket.yaml" 
+        template_parameters:
+          StateBucketName: "{{ state_bucket_name }}"
+        
