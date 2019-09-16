@@ -129,7 +129,7 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
             {% else %}
         network_id = "${libvirt_network.{{ net.network_name}}.id}"
             {% endif %}
-            {% if vm.wait_for_ip is defined and not vm.wait_for_ip %}
+            {% if net.wait_for_ip is defined and not net.wait_for_ip %}
         wait_for_lease = false
             {% elif net.address is not defined or net.type == "dhcp" %}
         wait_for_lease = true
@@ -190,7 +190,7 @@ data "template_file" "inventory" {
         ssh_user = "${var.ssh_username}"
         pkey_file_path = "${var.ssh_private_key_file}"
 {% for vm in vms %}
-    {% if vm.wait_for_ip is defined and not vm.wait_for_ip %}
+    {% if vm.networks[0].wait_for_ip is defined and not vm.networks[0].wait_for_ip %}
         {{ vm.vm_name }}_address = "0.0.0.0"
     {% else %}
         {{ vm.vm_name }}_address = "${libvirt_domain.{{ vm.vm_name }}.network_interface.0.addresses.0}"
