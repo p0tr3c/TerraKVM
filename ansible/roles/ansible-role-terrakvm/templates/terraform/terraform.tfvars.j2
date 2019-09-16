@@ -1,10 +1,11 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
     {% for net in networks %}
-{{ net.network_name }} = "{{ net.network_name }}"
-{{ net.network_name }}_mode =  "{{ net.network_mode }}"
-{{ net.network_name }}_dhcp = "{{ net.dhcp_enabled }}"
-{{ net.network_name }}_cidr =  "{{ net.network_cidr }}"
+{{ net.name }} = "{{ net.name }}"
+{{ net.name }}_mode =  "{{ net.mode }}"
+{{ net.name }}_dhcp = "{{ net.dhcp_enabled }}"
+{{ net.name }}_cidr =  "{{ net.cidr }}"
+{{ net.name }}_autostart = "{{ net.autostart }}"
     {% endfor %}
 {% endif %}
 ssh_username = "{{ ssh_username }}"

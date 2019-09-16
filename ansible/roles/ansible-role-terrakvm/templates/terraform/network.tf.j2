@@ -6,8 +6,8 @@ resource "libvirt_network" "{{ net.name }}" {
     {% if net.domain is defined %}
     domain = "${var.{{ net.name }}_domain}"
     {% endif %}
-    {% if net.addresses is defined %}
-    addresses = "${var.{{ net.name }}_addresses}"
+    {% if net.cidr is defined %}
+    addresses = ["${var.{{ net.name }}_cidr}"]
     {% endif %}
     {% if net.bridge is defined %}
     bridge = "${var.{{ net.name }}_bridge}"
