@@ -3,7 +3,7 @@
 
 output "{{ vm.vm_name }}" { value = "${
     map(
-    {% if vm.wait_for_ip is defined and not vm.wait_for_ip %}
+    {% if vm.networks[0].wait_for_ip is defined and not vm.networks[0].wait_for_ip %}
       "public_ip", "0.0.0.0",
     {% else %}
       "public_ip", "${libvirt_domain.{{ vm.vm_name }}.network_interface.0.addresses.0}",
