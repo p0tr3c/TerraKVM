@@ -75,6 +75,11 @@ function do_build(){
   docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/build.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
 }
 
+function do_init(){
+  pre_assert "$@"
+  docker-compose build
+}
+
 function do_preconfig(){
   cat > ./default.xml <<EOF
 <pool type="dir">
@@ -102,6 +107,7 @@ function main(){
         echo "    $0 apply <project>         Deploy <project>."
         echo "    $0 destroy <project>       Destroy <project>."
         echo "    $0 build <project>         Build <project>."
+        echo "    $0 init                    Initialize TerraKVM."
         exit 0
         ;;
      \? )
@@ -125,6 +131,9 @@ function main(){
       ;;
     build)
       do_build $@
+      ;;
+    init)
+      do_init $@
       ;;
     *)
       echo "[-] Unknown command"
