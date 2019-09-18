@@ -1,10 +1,11 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
     {% for net in networks %}
-variable "{{ net.network_name }}" {type = "string"}
-variable "{{ net.network_name }}_mode" {type = "string"}
-variable "{{ net.network_name }}_dhcp" {type = "string"}
-variable "{{ net.network_name }}_cidr" {type = "string"}
+variable "{{ net.name }}" {type = "string"}
+variable "{{ net.name }}_mode" {type = "string"}
+variable "{{ net.name }}_dhcp" {type = "string"}
+variable "{{ net.name }}_cidr" {type = "string"}
+variable "{{ net.name }}_autostart" {type = "string"}
     {% endfor %}
 {% endif %}
 variable "disk_id" {type="string", default = ""}
