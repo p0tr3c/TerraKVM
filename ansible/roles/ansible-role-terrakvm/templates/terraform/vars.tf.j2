@@ -6,6 +6,7 @@ variable "{{ net.name }}_mode" {type = "string"}
 variable "{{ net.name }}_dhcp" {type = "string"}
 variable "{{ net.name }}_cidr" {type = "string"}
 variable "{{ net.name }}_autostart" {type = "string"}
+variable "{{ net.name }}_bridge" {type="string"}
     {% endfor %}
 {% endif %}
 variable "disk_id" {type="string", default = ""}
