@@ -26,10 +26,25 @@ iso_images:
     virt_source: /var/lib/libvirt/images/alpine-virt-3.9.0-x86_64.iso
 
 cloud_images:
-  - url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2
-    iso_name: CentOS-7-x86_64-GenericCloud-1901.qcow2
-    checksum: sha256:76050d4624210954929d9d7a97a98611619a5fd02067fd7737e26f5a3a5e5333
+  - url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1907.qcow2
+    iso_name: CentOS-7-x86_64-GenericCloud-1907.qcow2
+    checksum: sha256:520d01c2f2e1ed24cb2f15a4325aa30773930a2961b5484a68cf11b4a415c512
     distro: centos
+    arch: amd64
+  - url:  https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/30/Cloud/x86_64/images/Fedora-Cloud-Base-30-1.2.x86_64.qcow2
+    iso_name: Fedora-Cloud-Base-30-1.2.x86_64.qcow2
+    checksum: sha256:72b6ae7b4ed09a4dccd6e966e1b3ac69bd97da419de9760b410e837ba00b4e26
+    distro: fedora30
+    arch: amd64
+  - url:  https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/test/31_Beta/Cloud/x86_64/images/Fedora-Cloud-Base-31_Beta-1.1.x86_64.qcow2
+    iso_name: Fedora-Cloud-Base-31_Beta-1.1.x86_64.qcow2
+    checksum: sha256:a25d5f7a834722408fc8f765cc378f50fe8b53c9628d916200dbe4ebed6c21aa
+    distro: fedora31
+    arch: amd64
+  - url:  https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-Rawhide-20190916.n.0/compose/Cloud/x86_64/images/Fedora-Cloud-Base-Rawhide-20190916.n.0.x86_64.qcow2
+    iso_name: Fedora-Cloud-Base-Rawhide-20190916.n.0.x86_64.qcow2
+    checksum: sha256:3ed47b1f694b4011240b9f7cd73e17d37c852923a96b122aec052a744c109701
+    distro: fedora-rawhide
     arch: amd64
   - url: https://www.mirrorservice.org/sites/dl.fedoraproject.org/pub/fedora/linux/releases/29/Cloud/x86_64/images/Fedora-Cloud-Base-29-1.2.x86_64.qcow2
     iso_name: Fedora-Cloud-Base-29-1.2.x86_64.qcow2

@@ -80,6 +80,11 @@ function do_init(){
   docker-compose build
 }
 
+function do_shell(){
+  pre_assert "$@"
+  docker-compose run terrakvm /bin/bash
+}
+
 function do_preconfig(){
   cat > ./default.xml <<EOF
 <pool type="dir">
@@ -134,6 +139,9 @@ function main(){
       ;;
     init)
       do_init $@
+      ;;
+    shell)
+      do_shell $@
       ;;
     *)
       echo "[-] Unknown command"

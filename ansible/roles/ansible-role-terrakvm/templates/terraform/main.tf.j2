@@ -131,7 +131,7 @@ resource "libvirt_domain" "{{ vm.vm_name }}" {
             {% endif %}
             {% if net.wait_for_ip is defined and not net.wait_for_ip %}
         wait_for_lease = false
-            {% elif net.address is not defined or net.type == "dhcp" %}
+            {% elif net.address is not defined %}
         wait_for_lease = true
             {% else %}
         wait_for_lease = false
@@ -192,6 +192,8 @@ data "template_file" "inventory" {
 {% for vm in vms %}
     {% if vm.networks[0].wait_for_ip is defined and not vm.networks[0].wait_for_ip %}
         {{ vm.vm_name }}_address = "0.0.0.0"
+    {% elif vm.networks[0].address is defined %}
+        {{ vm.vm_name }}_address = "${var.{{ vm.vm_name }}_{{ vm.networks[0].network_name }}_address}"
     {% else %}
         {{ vm.vm_name }}_address = "${libvirt_domain.{{ vm.vm_name }}.network_interface.0.addresses.0}"
     {% endif %}

@@ -40,7 +40,7 @@
     mode: 0660
     checksum: "{{ cloud_images | json_query(download_filter) | json_query('[*].checksum') | join('') }}"
   with_items: "{{ vms }}"
-  when: item.method is undefined or item.method == "cloud"
+  when: vms | length > 0 and (item.method is undefined or item.method == "cloud")
   tags: download_cloud_image
 
 - name: Build images via packer

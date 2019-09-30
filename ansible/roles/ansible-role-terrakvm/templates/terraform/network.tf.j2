@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
   {%- for net in networks %}
 resource "libvirt_network" "{{ net.name }}" {
@@ -35,7 +36,7 @@ resource "libvirt_network" "{{ net.name }}" {
     {% endif %}
     {% if net.dhcp is defined %}
     dhcp = {
-      enabled = {{ net.dhcp }}
+      enabled = {{ net.dhcp|lower }}
     }
     {% endif %}
 }
