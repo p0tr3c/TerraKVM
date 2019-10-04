@@ -3,10 +3,18 @@
     {% for net in networks %}
 variable "{{ net.name }}" {type = "string"}
 variable "{{ net.name }}_mode" {type = "string"}
+        {% if net.dhcp is defined %}
 variable "{{ net.name }}_dhcp" {type = "string"}
+        {% endif %}
+        {% if net.cidr is defined %}
 variable "{{ net.name }}_cidr" {type = "string"}
+        {% endif %}
+        {% if net.autostart is defined %}
 variable "{{ net.name }}_autostart" {type = "string"}
+        {% endif %}
+        {% if net.bridge is defined %}
 variable "{{ net.name }}_bridge" {type="string"}
+        {% endif %}
     {% endfor %}
 {% endif %}
 variable "disk_id" {type="string", default = ""}

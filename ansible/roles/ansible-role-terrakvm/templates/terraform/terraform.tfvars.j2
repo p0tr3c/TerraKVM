@@ -3,10 +3,15 @@
     {% for net in networks %}
 {{ net.name }} = "{{ net.name }}"
 {{ net.name }}_mode =  "{{ net.mode }}"
+        {% if net.dhcp is defined %}
 {{ net.name }}_dhcp = "{{ net.dhcp }}"
+        {% endif %}
+        {% if net.cidr is defined %}
 {{ net.name }}_cidr =  "{{ net.cidr }}"
+        {% endif %}
+        {% if net.autostart is defined %}
 {{ net.name }}_autostart = "{{ net.autostart }}"
-{{ net.name }}_bridge = "{{ net.bridge }}"
+        {% endif %}
     {% endfor %}
 {% endif %}
 ssh_username = "{{ ssh_username }}"
