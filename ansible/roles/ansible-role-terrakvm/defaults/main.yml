@@ -11,6 +11,7 @@ vms:
     vm_name: terrakvm
     distro: fedora29
     arch: amd64
+    enable_console: true
     ncpu: 2
     memory: 2048
     disks:
