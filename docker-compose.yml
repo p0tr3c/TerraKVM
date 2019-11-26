@@ -5,8 +5,8 @@ services:
     build:
       context: ./docker
       args:
-        USER_UID: "$SUDO_UID"
-        USER_GID: "$SUDO_GID"
+        HOST_UID: "$SUDO_UID"
+        HOST_GID: "$SUDO_GID"
         LIBVIRT_GID: "$LIBVIRT_GID"
         KVM_GID: "$KVM_GID"
     stdin_open: true

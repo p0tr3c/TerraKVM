@@ -1,0 +1,52 @@
+project_name: unit_tests_jinja_networks_vars
+networks:
+# Parameters
+# 1. name: required
+# 2. mode: required
+# 3. cidr: required
+# 4. autostart: optional
+# 5. dhcp: optional
+# 6. domain: optional
+# 7. mtu: optional
+# 8. bridge: optional
+# TODO:
+# routes: optional --> not implemented
+# dns: optional    --> not implemented
+  - name: test_01
+    mode: none
+    cidr: 10.20.30.0/24
+
+  - name: test_02
+    mode: none
+    cidr: 10.20.30.0/24
+    autostart: true
+
+  - name: test_03
+    mode: none
+    cidr: 10.20.30.0/24
+    autostart: true
+    dhcp: false
+
+  - name: test_04
+    mode: none
+    cidr: 10.20.30.0/24
+    autostart: true
+    dhcp: false
+    domain: test
+
+  - name: test_05
+    mode: none
+    cidr: 10.20.30.0/24
+    autostart: true
+    dhcp: false
+    domain: test
+    mtu: 1500
+
+  - name: test_06
+    bridge: virbr10
+    mode: none
+    cidr: 10.20.30.0/24
+    autostart: true
+    dhcp: false
+    domain: test
+    mtu: 1500

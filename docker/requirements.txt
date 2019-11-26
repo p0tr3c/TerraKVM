@@ -11,5 +11,4 @@ python-openstackclient
 python-glanceclient
 python-neutronclient
 pexpect
-libvirt-python
 lxml

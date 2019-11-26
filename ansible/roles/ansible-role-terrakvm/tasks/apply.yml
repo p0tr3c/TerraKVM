@@ -48,12 +48,12 @@
   loop: "{{ vms }}"
   loop_control:
     loop_var: build_item
-  when: build_item.method is defined and build_item.method == "packer"
+  when: vms | length > 0 and (build_item.method is defined and build_item.method == "packer")
 
 - name: Prepare ISO file
   include_tasks: iso.yml 
   loop: "{{ vms }}"
-  when: item.method is defined and item.method == "iso"
+  when: vms | length > 0 and (item.method is defined and item.method == "iso")
 
 - name: Template terraform instructions
   template:
@@ -97,22 +97,22 @@
     mode: 0600
   with_dict: "{{ terraform_output.outputs }}"
 
-- name: Add host for provisioning
-  add_host:
-    name: "{{ item.key }}"
-    group: terrakvm
-    ansible_ssh_user: "{{ item.value.value.ssh_username }}"
-    ansible_ssh_host: "{{ item.value.value.public_ip }}"
-    ansible_ssh_private_key_file: "{{ terraform_dir }}/{{ project_name}}.pkey"
-  with_dict: "{{ terraform_output.outputs }}"
-
-- name: Include per-host provisioning
-  include_tasks:
-    file: "{{ ansible_dir }}/{{ delegation.provisioning_tasks }}"
-  loop: "{{ vms }}"
-  loop_control:
-    loop_var: delegation
-  when: delegation.provisioning_tasks is defined
+#- name: Add host for provisioning
+#  add_host:
+#    name: "{{ item.key }}"
+#    group: terrakvm
+#    ansible_ssh_user: "{{ item.value.value.ssh_username }}"
+#    ansible_ssh_host: "{{ item.value.value.public_ip }}"
+#    ansible_ssh_private_key_file: "{{ terraform_dir }}/{{ project_name}}.pkey"
+#  with_dict: "{{ terraform_output.outputs }}"
+#
+#- name: Include per-host provisioning
+#  include_tasks:
+#    file: "{{ ansible_dir }}/{{ delegation.provisioning_tasks }}"
+#  loop: "{{ vms }}"
+#  loop_control:
+#    loop_var: delegation
+#  when: delegation.provisioning_tasks is defined
 
 - name: Connection information
   debug:

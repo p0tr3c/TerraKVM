@@ -1,45 +1,36 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
-  {%- for net in networks %}
+  {% for net in networks %}
 resource "libvirt_network" "{{ net.name }}" {
-    name = "${var.{{ net.name }}}"
-    mode = "${var.{{ net.name }}_mode}"
-    {% if net.domain is defined %}
-    domain = "${var.{{ net.name }}_domain}"
-    {% endif %}
+    name = var.{{ net.name }}
+    mode = var.{{ net.name }}_mode
     {% if net.cidr is defined %}
-    addresses = ["${var.{{ net.name }}_cidr}"]
+    addresses = [var.{{ net.name }}_cidr]
     {% endif %}
-    {% if net.bridge is defined %}
-    bridge = "${var.{{ net.name }}_bridge}"
+
+    {%- if net.domain is defined %}
+    domain = var.{{ net.name }}_domain
     {% endif %}
-    {% if net.mtu is defined %}
-    mtu = "${var.{{ net.name }}_mtu}"
+
+    {%- if net.bridge is defined %}
+    bridge = var.{{ net.name }}_bridge
     {% endif %}
-    {% if net.autostart is defined %}
-    autostart = "${var.{{ net.name }}_autostart}"
+
+    {%- if net.mtu is defined %}
+    mtu = var.{{ net.name }}_mtu
     {% endif %}
-    {% if net.routes is defined %}
-    routes = "${var.{{ net.name }}_routes}"
+
+    {%- if net.autostart is defined %}
+    autostart = var.{{ net.name }}_autostart
     {% endif %}
-    {% if net.dns is defined %}
-    dns = {
-      {% for key, value in net.dns.items() %}
-        {% if key == "local_only" %}
-        local_only = "{{ value }}"
-        {% endif %}
-        {% if key == "enabled" %}
-        enabled = "{{ value }}"
-        {% endif %}
-      {% endfor %}
-    }
-    {% endif %}
-    {% if net.dhcp is defined %}
+
+    {%- if net.dhcp is defined %}
     dhcp = {
       enabled = {{ net.dhcp|lower }}
     }
     {% endif %}
 }
+
   {% endfor %}
 {% endif %}
 

@@ -1,22 +1,36 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
     {% for net in networks %}
-variable "{{ net.name }}" {type = "string"}
-variable "{{ net.name }}_mode" {type = "string"}
-        {% if net.dhcp is defined %}
-variable "{{ net.name }}_dhcp" {type = "string"}
-        {% endif %}
+variable "{{ net.name }}" {}
+variable "{{ net.name }}_mode" {}
         {% if net.cidr is defined %}
-variable "{{ net.name }}_cidr" {type = "string"}
+variable "{{ net.name }}_cidr" {}
         {% endif %}
-        {% if net.autostart is defined %}
-variable "{{ net.name }}_autostart" {type = "string"}
+
+        {%- if net.domain is defined %}
+variable "{{ net.name }}_domain" {}
         {% endif %}
-        {% if net.bridge is defined %}
-variable "{{ net.name }}_bridge" {type="string"}
+
+        {%- if net.bridge is defined %}
+variable "{{ net.name }}_bridge" {}
         {% endif %}
+
+        {%- if net.mtu is defined %}
+variable "{{ net.name }}_mtu" {}
+        {% endif %}
+
+        {%- if net.autostart is defined %}
+variable "{{ net.name }}_autostart" {}
+        {% endif %}
+ 
+        {%- if net.dhcp is defined %}
+variable "{{ net.name }}_dhcp" {}
+        {% endif %}
+
     {% endfor %}
 {% endif %}
+
+{% if instances | length > 0 %}
 variable "disk_id" {type="string", default = ""}
 variable "volume_pool" {type = "string"}
 variable "cloudinit_iso" {type = "string"}
@@ -56,3 +70,4 @@ variable "{{ vm.vm_name }}_ncpu" {type = "string"}
 variable "{{ vm.vm_name }}_memory" {type = "string"}
 variable "{{ vm.vm_name }}_vm_name" {type = "string"}
 {% endfor %}
+{% endif %}

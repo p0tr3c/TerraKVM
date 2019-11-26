@@ -1,3 +1,22 @@
+####################################################################
+networks: []
+volumes: []
+instances: []
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+####################################################################
+
+
+
 # Project configuration
 project_name: dev
 volume_pool: default
@@ -6,19 +25,19 @@ ssh_username: dev
 ssh_public_key: ""
 
 # VM configuration
-vms:
-  - hostname: terrakvm
-    vm_name: terrakvm
-    distro: fedora29
-    arch: amd64
-    enable_console: true
-    ncpu: 2
-    memory: 2048
-    disks:
-      - name: root
-    networks:
-      - network_name: default
-        external: true
+#vms:
+#  - hostname: terrakvm
+#    vm_name: terrakvm
+#    distro: fedora29
+#    arch: amd64
+#    enable_console: true
+#    ncpu: 2
+#    memory: 2048
+#    disks:
+#      - name: root
+#    networks:
+#      - network_name: default
+#        external: true
 
 # Additional actions
 cleanup: false

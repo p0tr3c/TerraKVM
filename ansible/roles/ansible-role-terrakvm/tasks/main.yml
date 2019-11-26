@@ -12,3 +12,7 @@
   loop_control:
     loop_var: build_item
   when: action == "build" and (build_item.packer_build is defined and build_item.packer_build)
+
+- name: Development
+  include_tasks: dev.yml
+  when: action == "dev"

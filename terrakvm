@@ -47,6 +47,14 @@ function pre_assert(){
   fi
 }
 
+function do_dev(){
+  pre_assert $@
+  if [ -z "$PROJECT_FILENAME" ]; then
+      docker-compose run terrakvm ansible-playbook playbooks/dev.yml "${extra_args[@]}"
+  else
+      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
+  fi
+}
 
 function do_apply(){
   pre_assert $@
@@ -113,6 +121,7 @@ function main(){
         echo "    $0 destroy <project>       Destroy <project>."
         echo "    $0 build <project>         Build <project>."
         echo "    $0 init                    Initialize TerraKVM."
+        exho "    $0 dev                     Run development playbooks."
         exit 0
         ;;
      \? )
@@ -127,6 +136,9 @@ function main(){
   case "$subcommand" in
     preconfig)
       do_preconfig $@
+      ;;
+    dev)
+      do_dev $@
       ;;
     apply)
       do_apply $@

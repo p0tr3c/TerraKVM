@@ -1,19 +1,36 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if networks is defined %}
-    {% for net in networks %}
+    {% for net in networks %} 
 {{ net.name }} = "{{ net.name }}"
 {{ net.name }}_mode =  "{{ net.mode }}"
-        {% if net.dhcp is defined %}
-{{ net.name }}_dhcp = "{{ net.dhcp }}"
-        {% endif %}
         {% if net.cidr is defined %}
 {{ net.name }}_cidr =  "{{ net.cidr }}"
         {% endif %}
-        {% if net.autostart is defined %}
+
+        {%- if net.domain is defined %}
+{{ net.name }}_domain = "{{ net.domain }}"
+        {% endif %}
+
+        {%- if net.bridge is defined %}
+{{ net.name }}_bridge = "{{ net.bridge }}"
+        {% endif %}
+
+        {%- if net.mtu is defined %}
+{{ net.name }}_mtu = "{{ net.mtu }}"
+        {% endif %}
+
+        {%- if net.autostart is defined %}
 {{ net.name }}_autostart = "{{ net.autostart }}"
         {% endif %}
+
+        {%- if net.dhcp is defined %}
+{{ net.name }}_dhcp = "{{ net.dhcp }}"
+        {% endif %}
+
     {% endfor %}
 {% endif %}
+
+{% if instances | length > 0 %}
 ssh_username = "{{ ssh_username }}"
 ssh_public_key = "{{ ssh_public_key | b64decode }}"
 ssh_private_key_file = "./{{ project_name }}.pkey"
@@ -63,3 +80,4 @@ cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
 {{ vm.vm_name }}_memory = "{{ vm.memory | default('2048') }}"
 {{ vm.vm_name }}_vm_name = "{{ vm.vm_name }}"
 {% endfor %}
+{% endif %}
