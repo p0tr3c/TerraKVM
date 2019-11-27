@@ -2,23 +2,21 @@
 {% if instances is defined %}
 {% set base_distro_list=[] %}
     {% for instance in instances %}
-
         {% if instance.distro is undefined %}
-{% set current_distro = "ubuntu" %}
+{% set current_distro = default_instance_distro %}
         {% else %}
 {% set current_distro = instance.distro %}
         {% endif %}
 
         {% if instance.arch is undefined %}
-{% set current_arch = "x86_64" %}
+{% set current_arch = default_instance_arch %}
         {% else %}
 {% set current_arch = instance.arch %}
         {% endif %}
-
 {% set current_base_os = current_distro ~ "_" ~ current_arch %}
-
 {% if not current_base_os in base_distro_list %}
 resource "libvirt_volume" "{{ current_base_os }}_os_base" {
+    
 }
 {{ base_distro_list.append(current_base_os) }}
 {% endif %}

@@ -2,6 +2,10 @@
 networks: []
 volumes: []
 instances: []
+
+default_instance_distro: ubuntu
+default_instance_arch: x86_64
+
 #
 #
 #
@@ -14,9 +18,6 @@ instances: []
 #
 #
 ####################################################################
-
-
-
 # Project configuration
 project_name: dev
 volume_pool: default
