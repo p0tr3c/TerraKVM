@@ -1,0 +1,59 @@
+project_name: unit_tests_jinja_instance_template_syntax
+instances:
+# Parameters
+# 1. name: required
+# 2. cpu: optional
+# 3. vcpu: optional
+# 4. memory: optional
+# 5. running: optional
+# 6. disk: optional
+# 7. network_interface: optional
+# 8. cloudinit: optional
+# 9. autostart: optional
+# 10. filesystem: optional
+# 11. firmware: optional
+# 12. nvram: optional
+#
+# 13. distro: optional
+# 14. arch: optional
+# TODO:
+# kernel: optional --> not implemented
+# cmdline: optional    --> not implemented
+  - name: test_01
+
+  - name: test_02
+    distro: ubuntu
+    cpu: host-passthrough
+
+  - name: test_03
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+
+  - name: test_04
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+
+  - name: test_05
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+
+  - name: test_06
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+    
+    
+ 
+    

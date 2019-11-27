@@ -1,73 +1,104 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
+variable "disk_id" {}
+variable "volume_pool" {}
+variable "cloudinit_iso" {}
+variable "ssh_username" {}
+variable "ssh_public_key" {}
+variable "ssh_private_key_file" {}
+
+# Networks
+
 {% if networks is defined %}
     {% for net in networks %}
-variable "{{ net.name }}" {}
-variable "{{ net.name }}_mode" {}
+variable "net_{{ net.name }}" {}
+variable "net_{{ net.name }}_mode" {}
         {% if net.cidr is defined %}
-variable "{{ net.name }}_cidr" {}
+variable "net_{{ net.name }}_cidr" {}
         {% endif %}
 
         {%- if net.domain is defined %}
-variable "{{ net.name }}_domain" {}
+variable "net_{{ net.name }}_domain" {}
         {% endif %}
 
         {%- if net.bridge is defined %}
-variable "{{ net.name }}_bridge" {}
+variable "net_{{ net.name }}_bridge" {}
         {% endif %}
 
         {%- if net.mtu is defined %}
-variable "{{ net.name }}_mtu" {}
+variable "net_{{ net.name }}_mtu" {}
         {% endif %}
 
         {%- if net.autostart is defined %}
-variable "{{ net.name }}_autostart" {}
+variable "net_{{ net.name }}_autostart" {
+    type = bool
+    default = false
+}
         {% endif %}
  
         {%- if net.dhcp is defined %}
-variable "{{ net.name }}_dhcp" {}
+variable "net_{{ net.name }}_dhcp" {
+    type = bool
+    default = false
+}
         {% endif %}
 
     {% endfor %}
 {% endif %}
 
-{% if instances | length > 0 %}
-variable "disk_id" {type="string", default = ""}
-variable "volume_pool" {type = "string"}
-variable "cloudinit_iso" {type = "string"}
-variable "ssh_username" {type = "string"}
-variable "ssh_public_key" {type = "string"}
-variable "ssh_private_key_file" {type = "string"}
-{% for vm in vms %}
-  {% for disk in vm.disks %}
-    {% if disk.type is undefined or disk.type != "iso" %}
-      {% if disk.size is defined and (disk.source is undefined or disk.source != "/dev/zero") %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_base" {type = "string"}
-      {% endif %}
-variable "{{ vm.vm_name }}_{{ disk.name }}" {type = "string"}
-variable "{{ vm.vm_name }}_{{ disk.name }}_pool" {type = "string", default = "default"}
-      {% if disk.size is defined %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_size" {type = "string"}
-      {% endif %}
-      {% if disk.base_volume_name is defined %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_base_volume_name" {type = "string"}
-variable "{{ vm.vm_name }}_{{ disk.name }}_base_volume_pool" {type = "string", default = "default"}
-      {% endif %}
+# Volumes
+
+{% if volumes is defined %}
+  {% for vol in volumes %}
+variable "vol_{{ vol.name }}" {}
+
+    {% if vol.pool is defined %}
+variable "vol_{{ vol.name }}_pool" {}
     {% endif %}
-    {% if disk.source is undefined or disk.source != "/dev/zero" %}
-variable "{{ vm.vm_name }}_{{ disk.name }}_source" {type = "string"}
+
+    {%- if vol.source is defined %}
+variable "vol_{{ vol.name }}_source" {}
+    {% endif %}
+
+    {%- if vol.size is defined %}
+variable "vol_{{ vol.name }}_size" {}
+    {% endif %}
+
+    {%- if vol.base_volume_id is defined %}
+variable "vol_{{ vol.name }}_base_volume_id" {}
+    {% endif %}
+
+    {%- if vol.base_volume_name is defined %}
+variable "vol_{{ vol.name }}_base_volume_name" {}
+    {% endif %}
+
+    {%- if vol.base_volume_pool is defined %}
+variable "vol_{{ vol.name }}_base_volume_pool" {}
     {% endif %}
   {% endfor %}
-  {% for vm_net in vm.networks %}
-        {% if vm_net.bridge is not defined %}
-variable "{{ vm.vm_name }}_{{ vm_net.network_name }}" {type = "string"}
-            {% if vm_net.address is defined %}
-variable "{{ vm.vm_name }}_{{ vm_net.network_name }}_address" {type = "string"}
-            {% endif %}
+{% endif %}
+
+# Instances
+
+{% if instances is defined %}
+    {% for instance in instances %}
+variable "dom_{{ instance.name }}" {}
+variable "dom_{{ instance.name }}_cpu" {}
+variable "dom_{{ instance.name }}_vpcu" {
+    default=2
+}
+variable "dom_{{ instance.name }}_memory" {
+    default=1024
+} 
+variable "dom_{{ instance.name }}_running" {
+    default=true
+}
+        {% if instance.disks is defined %}
+            {% for disk in instance.disks %}
+                {%- if disk.file is defined %}
+variable "{{ instance.name }}_{{ disk.name }}_source" {}
+                {% endif %}
+            {% endfor %}
         {% endif %}
     {% endfor %}
-variable "{{ vm.vm_name }}_hostname" {type = "string" }
-variable "{{ vm.vm_name }}_ncpu" {type = "string"}
-variable "{{ vm.vm_name }}_memory" {type = "string"}
-variable "{{ vm.vm_name }}_vm_name" {type = "string"}
-{% endfor %}
 {% endif %}
+

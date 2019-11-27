@@ -376,3 +376,27 @@ vms:
       - network_name: default
         external: true
 ```
+
+# Networks
+
+## Multiple networks
+
+You can deploy multiple networks in a single project file
+
+There is currently issue with how the provider handles automatic bridge names (https://github.com/dmacvicar/terraform-provider-libvirt/issues/560)
+
+To overcome the limitation you need to provide the custom bridge names via `bridge` variable
+
+```
+project_name: multiple_networks
+networks:
+  - name: test_01
+    mode: none
+    cidr: 10.20.30.0/24
+	bridge: test_01_brd
+
+  - name: test_02
+    mode: none
+    cidr: 10.20.40.0/24
+	bridge: test_02_brd
+```

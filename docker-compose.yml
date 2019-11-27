@@ -1,9 +1,9 @@
 version: '3'
 services:
   terrakvm:
-    container_name: terrakvm
+    image: terrakvm:alpine
     build:
-      context: ./docker
+      context: ./docker/alpine
       args:
         HOST_UID: "$SUDO_UID"
         HOST_GID: "$SUDO_GID"

@@ -47,12 +47,30 @@ function pre_assert(){
   fi
 }
 
-function do_dev(){
+function do_dev_apply(){
   pre_assert $@
   if [ -z "$PROJECT_FILENAME" ]; then
-      docker-compose run terrakvm ansible-playbook playbooks/dev.yml "${extra_args[@]}"
+      docker-compose run terrakvm ansible-playbook playbooks/dev-apply.yml "${extra_args[@]}"
   else
-      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
+      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev-apply.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
+  fi
+}
+
+function do_dev_destroy(){
+  pre_assert $@
+  if [ -z "$PROJECT_FILENAME" ]; then
+      docker-compose run terrakvm ansible-playbook playbooks/dev-destroy.yml "${extra_args[@]}"
+  else
+      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev-destroy.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
+  fi
+}
+
+function do_dev_template(){
+  pre_assert $@
+  if [ -z "$PROJECT_FILENAME" ]; then
+      docker-compose run terrakvm ansible-playbook playbooks/dev-apply.yml --tags template "${extra_args[@]}"
+  else
+      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev-apply.yml -e "@$PROJECT_FILENAME" --tags template "${extra_args[@]}"
   fi
 }
 
@@ -121,7 +139,9 @@ function main(){
         echo "    $0 destroy <project>       Destroy <project>."
         echo "    $0 build <project>         Build <project>."
         echo "    $0 init                    Initialize TerraKVM."
-        exho "    $0 dev                     Run development playbooks."
+        echo "    $0 dev-apply               Run development playbooks."
+        echo "    $0 dev-destroy             Run development playbooks."
+        echo "    $0 dev-template            Run development playbooks."
         exit 0
         ;;
      \? )
@@ -137,8 +157,14 @@ function main(){
     preconfig)
       do_preconfig $@
       ;;
-    dev)
-      do_dev $@
+    dev-apply)
+      do_dev_apply $@
+      ;;
+    dev-destroy)
+      do_dev_destroy $@
+      ;;
+    dev-template)
+      do_dev_template $@
       ;;
     apply)
       do_apply $@

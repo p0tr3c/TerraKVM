@@ -1,0 +1,12 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  #debugger: on_failed
+  tasks:
+    - name: Hacking
+      include_role:
+        name: ansible-role-terrakvm
+      vars:
+        action: dev-apply
+      tags:
+        - always

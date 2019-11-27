@@ -2,30 +2,30 @@
 {% if networks is defined %}
   {% for net in networks %}
 resource "libvirt_network" "{{ net.name }}" {
-    name = var.{{ net.name }}
-    mode = var.{{ net.name }}_mode
+    name = var.net_{{ net.name }}
+    mode = var.net_{{ net.name }}_mode
     {% if net.cidr is defined %}
-    addresses = [var.{{ net.name }}_cidr]
+    addresses = [var.net_{{ net.name }}_cidr]
     {% endif %}
 
     {%- if net.domain is defined %}
-    domain = var.{{ net.name }}_domain
+    domain = var.net_{{ net.name }}_domain
     {% endif %}
 
     {%- if net.bridge is defined %}
-    bridge = var.{{ net.name }}_bridge
+    bridge = var.net_{{ net.name }}_bridge
     {% endif %}
 
     {%- if net.mtu is defined %}
-    mtu = var.{{ net.name }}_mtu
+    mtu = var.net_{{ net.name }}_mtu
     {% endif %}
 
     {%- if net.autostart is defined %}
-    autostart = var.{{ net.name }}_autostart
+    autostart = var.net_{{ net.name }}_autostart
     {% endif %}
 
     {%- if net.dhcp is defined %}
-    dhcp = {
+    dhcp {
       enabled = {{ net.dhcp|lower }}
     }
     {% endif %}

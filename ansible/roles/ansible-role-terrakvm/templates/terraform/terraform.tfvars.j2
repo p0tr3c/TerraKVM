@@ -1,83 +1,89 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
-{% if networks is defined %}
-    {% for net in networks %} 
-{{ net.name }} = "{{ net.name }}"
-{{ net.name }}_mode =  "{{ net.mode }}"
-        {% if net.cidr is defined %}
-{{ net.name }}_cidr =  "{{ net.cidr }}"
-        {% endif %}
-
-        {%- if net.domain is defined %}
-{{ net.name }}_domain = "{{ net.domain }}"
-        {% endif %}
-
-        {%- if net.bridge is defined %}
-{{ net.name }}_bridge = "{{ net.bridge }}"
-        {% endif %}
-
-        {%- if net.mtu is defined %}
-{{ net.name }}_mtu = "{{ net.mtu }}"
-        {% endif %}
-
-        {%- if net.autostart is defined %}
-{{ net.name }}_autostart = "{{ net.autostart }}"
-        {% endif %}
-
-        {%- if net.dhcp is defined %}
-{{ net.name }}_dhcp = "{{ net.dhcp }}"
-        {% endif %}
-
-    {% endfor %}
-{% endif %}
-
-{% if instances | length > 0 %}
 ssh_username = "{{ ssh_username }}"
 ssh_public_key = "{{ ssh_public_key | b64decode }}"
 ssh_private_key_file = "./{{ project_name }}.pkey"
 volume_pool =  "{{ volume_pool | default('default') }}"
 cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
 
-{% for vm in vms %}
-    {% for disk in vm.disks %}
-      {% if disk.type is undefined or disk.type != "iso" %}
-        {% if disk.size is defined and (disk.source is undefined or disk.source != "/dev/zero") %}
-{{ vm.vm_name }}_{{ disk.name }}_base = "{{vm.vm_name }}_{{ disk.name }}_base"
+{% if networks is defined %}
+    {% for net in networks %} 
+net_{{ net.name }} = "{{ net.name }}"
+net_{{ net.name }}_mode =  "{{ net.mode }}"
+        {% if net.cidr is defined %}
+net_{{ net.name }}_cidr =  "{{ net.cidr }}"
         {% endif %}
-{{ vm.vm_name }}_{{ disk.name }} = "{{vm.vm_name }}_{{ disk.name }}"
-{{ vm.vm_name }}_{{ disk.name }}_pool = "{{ disk.pool | default('default') }}"
-        {% if disk.size is defined %}
-{{ vm.vm_name }}_{{ disk.name }}_size = "{{ disk.size }}"
+
+        {%- if net.domain is defined %}
+net_{{ net.name }}_domain = "{{ net.domain }}"
         {% endif %}
-        {% if disk.base_volume_name is defined %}
-{{ vm.vm_name }}_{{ disk.name }}_base_volume_name = "{{ disk.base_volume_name }}"
-{{ vm.vm_name }}_{{ disk.name }}_base_volume_pool = "{{ disk.base_volume_pool | default('default') }}"
+
+        {%- if net.bridge is defined %}
+net_{{ net.name }}_bridge = "{{ net.bridge }}"
         {% endif %}
-      {% endif %}
-      {% if disk.source is defined %}
-{{ vm.vm_name }}_{{ disk.name }}_source = "{{ disk.source }}"
-      {% else %}
-        {% if vm.method is undefined or vm.method == "cloud" %}
-          {% set terraform_loop_iso_filter = "[?distro=='"+ vm.distro +"' && arch=='" + vm.arch +"'].iso_name" %}
-{{ vm.vm_name }}_{{ disk.name }}_source = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_loop_iso_filter) | join('')}}"
-        {% elif vm.method == "packer" %}
-{{ vm.vm_name }}_{{ disk.name }}_source = "{{ packer_dir }}/{{ vm.vm_name }}/output/{{ vm.vm_name }}"
-        {% elif vm.method == "iso" %}
-          {% set terraform_loop_iso_filter = "[?distro=='"+ vm.distro +"' && arch=='" + vm.arch +"'].virt_source" %}
-{{ vm.vm_name }}_{{ disk.name }}_source = "{{ iso_images | json_query(terraform_loop_iso_filter) | join('')}}"
+
+        {%- if net.mtu is defined %}
+net_{{ net.name }}_mtu = "{{ net.mtu }}"
         {% endif %}
-      {% endif %}
+
+        {%- if net.autostart is defined and net.autostart %}
+net_{{ net.name }}_autostart = true
+        {% endif %}
+
+        {%- if net.dhcp is defined and net.dhcp %}
+net_{{ net.name }}_dhcp = true
+        {% endif %}
+
     {% endfor %}
-    {% for vm_net in vm.networks %}
-        {% if vm_net.bridge is not defined %}
-{{ vm.vm_name }}_{{ vm_net.network_name }} = "{{ vm_net.network_name }}"
-            {% if vm_net.address is defined %}
-{{ vm.vm_name }}_{{ vm_net.network_name }}_address = "{{ vm_net.address }}"
-            {% endif %}
+{% endif %}
+
+{% if volumes is defined %}
+  {% for vol in volumes %}
+vol_{{ vol.name }} = "{{ vol.name }}"
+    {% if vol.pool is defined %}
+vol_{{ vol.name }}_pool = "{{ vol.pool }}"
+    {% endif %}
+
+    {%- if vol.source is defined %}
+vol_{{ vol.name }}_source = "{{ vol.source }}"
+    {% endif %}
+
+    {%- if vol.size is defined %}
+vol_{{ vol.name }}_size = "{{ vol.size }}"
+    {% endif %}
+
+    {%- if vol.base_volume_id is defined %}
+vol_{{ vol.name }}_base_volume_id = "{{ vol.base_volume_id }}"
+    {% endif %}
+
+    {%- if vol.base_volume_name is defined %}
+vol_{{ vol.name }}_base_volume_name = "{{ vol.base_volume_name }}"
+    {% endif %}
+
+    {%- if vol.base_volume_pool is defined %}
+vol_{{ vol.name }}_base_volume_pool = "{{ vol.base_volume_pool }}"
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+
+{% if instances is defined %}
+    {% for instance in instances %}
+dom_{{ instance.name }} = {{ instance.name }}
+        {% if instance.cpu is defined %}
+dom_{{ instance.name }}_cpu = {{ instance.cpu }}
+        {% endif %} 
+        {% if instance.vcpu is defined %}
+dom_{{ instance.name }}_vpcu = {{ instance.vcpu }}
+        {% endif %}
+        {% if instance.memory is defined %}
+dom_{{ instance.name }}_memory = {{ instance.memory }}
+        {% endif %}
+        {% if instance.disks is defined %}
+            {% for disk in instance.disks %}
+                {%- if disk.file is defined %}
+{{ instance.name }}_{{ disk.name }}_source = {{ disk.file }}
+                {% endif %}
+            {% endfor %}
         {% endif %}
     {% endfor %}
-{{ vm.vm_name }}_hostname = "{{ vm.hostname }}"
-{{ vm.vm_name }}_ncpu = "{{ vm.ncpu | default('2') }}"
-{{ vm.vm_name }}_memory = "{{ vm.memory | default('2048') }}"
-{{ vm.vm_name }}_vm_name = "{{ vm.vm_name }}"
-{% endfor %}
 {% endif %}

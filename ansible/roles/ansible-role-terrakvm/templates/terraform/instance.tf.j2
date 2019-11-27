@@ -1,0 +1,158 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+{% if instances is defined %}
+{% set base_distro_list=[] %}
+    {% for instance in instances %}
+
+        {% if instance.distro is undefined %}
+{% set current_distro = "ubuntu" %}
+        {% else %}
+{% set current_distro = instance.distro %}
+        {% endif %}
+
+        {% if instance.arch is undefined %}
+{% set current_arch = "x86_64" %}
+        {% else %}
+{% set current_arch = instance.arch %}
+        {% endif %}
+
+{% set current_base_os = current_distro ~ "_" ~ current_arch %}
+
+{% if not current_base_os in base_distro_list %}
+resource "libvirt_volume" "{{ current_base_os }}_os_base" {
+}
+{{ base_distro_list.append(current_base_os) }}
+{% endif %}
+        {% if instance.disks is undefined %}
+resource "libvirt_volume" "{{ instance.name }}_root" {
+    name = dom_vol_{{ instance.name }}_root
+    base_volume_id = libvirt_volume.{{ instance.name }}_base
+}
+        {% else %}
+            {% for disk in instance.disks %}
+resource "libvirt_volume" "{{ instance.name }}_{{ disk.name }}" {
+    name = dom_vol_{{ instance.name }}_{{ disk.name }}
+    {% if disk.pool is defined %}
+    pool = {{ disk.pool }}
+    {% endif %}
+
+    {%- if disk.source is defined %}
+    source = {{ disk.source }}
+    {% endif %}
+
+    {%- if disk.size is defined %}
+    size = {{ disk.size }}
+    {% endif %}
+
+    {%- if disk.base_volume_id is defined %}
+    base_volume_id = {{ disk.base_volume_id }}
+    {% endif %}
+
+    {%- if disk.base_volume_name is defined %}
+    base_volume_name = {{ disk.base_volume_name }}
+    {% endif %}
+
+    {%- if disk.base_volume_pool is defined %}
+    base_volume_pool = {{ disk.base_volume_pool }}
+    {% endif %}
+}
+            {% endfor %}
+        {% endif %}
+resource "libvirt_domain" "{{ instance.name }}" {
+    name = var.dom_{{ instance.name }}
+    cpu = {
+        mode = var.dom_{{ instance.name }}_cpu
+    }
+    vcpu = var.dom_{{ instance.name }}_vpcu
+    memory = var.dom_{{ instance.name }}_memory 
+    running = var.dom_{{ instance.name }}_running
+
+    disk = [
+    {% if instance.disks is undefined %}
+        {
+            volume_id = libvirt_volume.{{ instance.name }}_root.id
+        }
+    {% else %}
+        {% for disk in instance.disks %}
+            {%- if disk.file is defined %}
+        {
+            file = {{ disk.file }}
+        }
+            {% elif disk.url is defined %}
+        {
+            url = {{ disk.url }}
+        }
+            {% elif disk.volume_id is defined %}
+        {
+            volume_id = {{ disk.volume_id }}
+        }
+            {% else %}
+        {
+            volume_id = libvirt_volume.{{ instance.name }}_{{ disk.name }}.id
+        }
+            {% endif %}
+            {% if not loop.last %},
+            {% endif %} 
+        {% endfor %}
+    {% endif %}
+    ]
+    
+    {% if instance.networks is defined %}
+    {% for net in instance.networks %}
+    network_interface {
+        {% if net.network_name is defined %}
+        network_name = {{ net.network_name }}
+        {% endif %}
+
+        {% if net.network_id is defined %}
+        network_id = {{ net.network_id }}
+        {% endif %}
+
+        {% if net.mac is defined %}
+        mac = {{ net.mac }}
+        {% endif %}
+
+        {% if net.addresses is defined %}
+        addresses = [
+            {% for net_addr in net.addresses %}
+            net_addr
+            {% if not loop.last %},
+            {% endif %}
+            {% endfor %}
+        ]
+        {% endif %}
+
+        {% if net.hostname is defined %}
+        hostname = {{ net.hostname }}
+        {% endif %}
+
+        {% if net.wait_for_lease is defined and not net.wait_for_lease %}
+        wait_for_lease = false
+        {% endif %}
+    }
+    {% endfor %}
+    {% endif %}
+
+    {% if instance.cloudinit is defined %}
+    cloudinit = {{ instance.cloudinit }}
+    {% endif %}
+
+    {% if instance.autostart is defined and not instance.autostart %}
+    autostart = false
+    {% endif %}
+
+    {% if instance.filesystem is defined %}
+    filesystem {
+        source = {{ instance.filesystem.source }}
+        target = {{ instance.filesystem.target }}
+        {% if instance.filesystem.readonly is defined and instance.filesystem.readonly %}
+        readonly = true
+        {% else %}
+        readonly = false
+        {% endif %}
+    }
+    {% endif %}
+}
+
+  {% endfor %}
+{% endif %}
+

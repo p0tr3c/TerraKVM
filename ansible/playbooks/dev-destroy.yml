@@ -1,0 +1,10 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  #debugger: on_failed
+  tasks:
+    - name: Hacking (Destroy)
+      include_role:
+        name: ansible-role-terrakvm
+      vars:
+        action: dev-destroy

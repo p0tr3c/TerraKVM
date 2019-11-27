@@ -1,15 +1,14 @@
 FROM alpine:latest
 
 LABEL version="0.2"
-LABEL name="terrakvm"
 
 ARG TERRAFORM_VERSION=0.12.16
 ARG PACKER_VERSION=1.4.5
 
 ARG HOST_UID=1000
 ARG HOST_GID=1000
-ARG KMV_GID=992
-ARG LIBVIRT_GID
+ARG KVM_GID=121
+ARG LIBVIRT_GID=129
 ARG USER_NAME="pwn"
 
 RUN apk update && \
@@ -58,20 +57,19 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt
 
 RUN addgroup -g ${HOST_GID} -S ${USER_NAME}
+RUN groupmod -g ${LIBVIRT_GID} libvirt
+RUN groupmod -g ${KVM_GID} kvm
 RUN adduser -u ${HOST_UID} -G ${USER_NAME} -G kvm -G libvirt -D ${USER_NAME}
-COPY bashrc /home/${USER_NAME}/.bashrc
 
 # Install libvirt provider
-RUN cd /tmp/build && \
-    wget -O terraform-provider-libvirt.tar.gz https://github.com/dmacvicar/terraform-provider-libvirt/releases/download/v0.6.0/terraform-provider-libvirt-0.6.0+git.1569597268.1c8597df.Ubuntu_18.04.amd64.tar.gz && \
-    tar -zxvf terraform-provider-libvirt.tar.gz && \
-    mkdir -p /home/$USER_NAME/.terraform.d/plugins && \
-    mkdir -p /root/.terraform.d/plugins && \
-    cp terraform-provider-libvirt /home/$USER_NAME/.terraform.d/plugins/ && \
-    cp terraform-provider-libvirt /root/.terraform.d/plugins/ && \
-    chown $USER_NAME:$USER_NAME -R /home/$USER_NAME/ &&  \
-    chmod 0755 /home/$USER_NAME/.terraform.d/plugins/terraform-provider-libvirt && \
-    rm -rf /tmp/build/*
+RUN mkdir -p /home/$USER_NAME/.terraform.d/plugins && \
+    mkdir -p /root/.terraform.d/plugins
+
+COPY terraform-provider-libvirt /home/$USER_NAME/.terraform.d/plugins/
+COPY terraform-provider-libvirt /root/.terraform.d/plugins/
+
+RUN chown $USER_NAME:$USER_NAME -R /home/$USER_NAME/ &&  \
+    chmod 0755 /home/$USER_NAME/.terraform.d/plugins/terraform-provider-libvirt
 
 RUN rm -rf /tmp/build
 

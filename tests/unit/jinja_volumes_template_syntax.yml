@@ -1,0 +1,47 @@
+project_name: unit_tests_jinja_volumes_template_syntax
+volumes:
+# Parameters
+# 1. name: required
+# 2. pool: optional
+# 3. source: optional 
+# 4. size: optional
+# 5. base_volume_id: optional
+# 6. base_volume_name: optional
+# 7. base_volume_pool: optional
+  - name: test_01
+
+  - name: test_02
+    pool: default
+
+  - name: test_03
+    pool: default
+    source: /dev/null
+
+  - name: test_04
+    pool: default
+    source: /dev/null
+    size: 10000
+
+  - name: test_05
+    pool: default
+    source: /dev/null
+    size: 10000
+    base_volume_id: id-1
+
+  - name: test_06
+    pool: default
+    source: /dev/null
+    size: 10000
+    base_volume_id: id-1
+    base_volume_name: test
+
+  - name: test_07
+    pool: default
+    source: /dev/null
+    size: 10000
+    base_volume_id: id-1
+    base_volume_name: test
+    base_volume_pool: default
+
+
+

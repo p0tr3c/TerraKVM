@@ -13,6 +13,14 @@
     loop_var: build_item
   when: action == "build" and (build_item.packer_build is defined and build_item.packer_build)
 
-- name: Development
-  include_tasks: dev.yml
-  when: action == "dev"
+- name: Development (Apply)
+  include_tasks: dev-apply.yml
+  when: action == "dev-apply"
+  tags:
+    - always
+
+- name: Development (Destroy)
+  include_tasks: dev-destroy.yml
+  when: action == "dev-destroy"
+  tags:
+    - always

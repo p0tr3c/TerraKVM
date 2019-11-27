@@ -3,8 +3,5 @@
     src: "terraform/{{ item.name }}.j2"
     dest: "{{ terraform_dir }}/{{ item.name }}"
   with_items:
-    - { name: "provider.tf" }
     - { name: "network.tf" }
-    - { name: "vars.tf" }
-    - { name: "terraform.tfvars" }
 

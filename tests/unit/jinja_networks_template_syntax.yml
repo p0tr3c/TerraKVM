@@ -1,4 +1,4 @@
-project_name: unit_tests_jinja_networks_vars
+project_name: unit_tests_jinja_networks_template_syntax
 networks:
 # Parameters
 # 1. name: required

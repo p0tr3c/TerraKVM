@@ -1,0 +1,33 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+{% if volumes is defined %}
+  {% for vol in volumes %}
+resource "libvirt_volume" "{{ vol.name }}" {
+    name = var.vol_{{ vol.name }}
+    {% if vol.pool is defined %}
+    pool = var.vol_{{ vol.name }}_pool
+    {% endif %}
+
+    {%- if vol.source is defined %}
+    source = var.vol_{{ vol.name }}_source
+    {% endif %}
+
+    {%- if vol.size is defined %}
+    size = var.vol_{{ vol.name }}_size
+    {% endif %}
+
+    {%- if vol.base_volume_id is defined %}
+    base_volume_id = var.vol_{{ vol.name }}_base_volume_id
+    {% endif %}
+
+    {%- if vol.base_volume_name is defined %}
+    base_volume_name = var.vol_{{ vol.name }}_base_volume_name
+    {% endif %}
+
+    {%- if vol.base_volume_pool is defined %}
+    base_volume_pool = var.vol_{{ vol.name }}_base_volume_pool
+    {% endif %}
+}
+
+  {% endfor %}
+{% endif %}
+
