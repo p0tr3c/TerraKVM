@@ -24,7 +24,9 @@ qemu-img
 qemu-system-x86_64
 libvirt
 libvirt-daemon
+libvirt-dev
 openssh
 iproute2
 libxml2-dev
 libxslt-dev
+xorriso

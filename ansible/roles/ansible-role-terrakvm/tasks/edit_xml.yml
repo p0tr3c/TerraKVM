@@ -2,20 +2,24 @@
   wait_for:
     timeout: "{{ inner.sync_wait }}"
   when: inner.sync_wait is defined
+
 - name: Disable VM
   virt:
     command: destroy
-    name: "{{ inner.vm_name }}"
+    name: "{{ inner.name }}"
+
 - name: Dump XML
   virt:
     command: get_xml
-    name: "{{ inner.vm_name }}"
+    name: "{{ inner.name }}"
   register: vm_xml_content
+
 - name: Create temp file
   tempfile:
     state: file
-    suffix: "{{ inner.vm_name }}.xml"
+    suffix: "{{ inner.name }}.xml"
   register: vm_temp_file
+
 - name: Store in file
   copy:
     dest: "{{ vm_temp_file.path }}"
@@ -38,7 +42,7 @@
 - name: Restart VM
   virt:
     command: start
-    name: "{{ inner.vm_name }}"
+    name: "{{ inner.name }}"
 - name: Delete temp file
   file:
     path: "{{ vm_temp_file.path }}"

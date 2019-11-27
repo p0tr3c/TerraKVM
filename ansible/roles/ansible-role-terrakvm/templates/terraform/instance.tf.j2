@@ -6,35 +6,40 @@
 {% set current_distro = default_instance_distro %}
         {% else %}
 {% set current_distro = instance.distro %}
-        {% endif %}
+        {% endif -%}
 
         {% if instance.arch is undefined %}
 {% set current_arch = default_instance_arch %}
         {% else %}
 {% set current_arch = instance.arch %}
-        {% endif %}
+        {% endif -%}
+
 {% set current_base_os = current_distro ~ "_" ~ current_arch %}
-{% if not current_base_os in base_distro_list %}
-resource "libvirt_volume" "{{ current_base_os }}_os_base" {
-    
+        {% if not current_base_os in base_distro_list %}
+resource "libvirt_volume" "{{ current_base_os }}_os_base" {    
+{% set terraform_loop_iso_filter = "[?distro=='"+ current_distro +"' && arch=='" + current_arch +"'].iso_name" %}
+    name = "{{ project_name }}_{{ current_base_os }}_os_base"
+    pool = "{{ default_libvirt_storage_pool }}"
+    source = "{{ download_cache_dir }}/{{ cloud_images | json_query(terraform_loop_iso_filter) | join('')}}"
 }
 {{ base_distro_list.append(current_base_os) }}
-{% endif %}
+        {% endif -%}
+
         {% if instance.disks is undefined %}
 resource "libvirt_volume" "{{ instance.name }}_root" {
-    name = dom_vol_{{ instance.name }}_root
-    base_volume_id = libvirt_volume.{{ instance.name }}_base
+    name = "{{ project_name }}_dom_vol_{{ instance.name }}_root"
+    base_volume_id = libvirt_volume.{{ current_base_os }}_os_base.id
 }
         {% else %}
             {% for disk in instance.disks %}
 resource "libvirt_volume" "{{ instance.name }}_{{ disk.name }}" {
-    name = dom_vol_{{ instance.name }}_{{ disk.name }}
+    name = "{{ project_name }}_dom_vol_{{ instance.name }}_{{ disk.name }}"
     {% if disk.pool is defined %}
-    pool = {{ disk.pool }}
-    {% endif %}
+    pool = "{{ disk.pool }}"
+    {% endif -%}
 
     {%- if disk.source is defined %}
-    source = {{ disk.source }}
+    source = "{{ disk.source }}"
     {% endif %}
 
     {%- if disk.size is defined %}
@@ -43,18 +48,21 @@ resource "libvirt_volume" "{{ instance.name }}_{{ disk.name }}" {
 
     {%- if disk.base_volume_id is defined %}
     base_volume_id = {{ disk.base_volume_id }}
+    {% elif disk.name == "root" %}
+    base_volume_id = libvirt_volume.{{ current_base_os }}_os_base.id
     {% endif %}
 
     {%- if disk.base_volume_name is defined %}
-    base_volume_name = {{ disk.base_volume_name }}
+    base_volume_name = "{{ disk.base_volume_name }}"
     {% endif %}
 
     {%- if disk.base_volume_pool is defined %}
-    base_volume_pool = {{ disk.base_volume_pool }}
+    base_volume_pool = "{{ disk.base_volume_pool }}"
     {% endif %}
 }
             {% endfor %}
         {% endif %}
+
 resource "libvirt_domain" "{{ instance.name }}" {
     name = var.dom_{{ instance.name }}
     cpu = {
@@ -64,79 +72,82 @@ resource "libvirt_domain" "{{ instance.name }}" {
     memory = var.dom_{{ instance.name }}_memory 
     running = var.dom_{{ instance.name }}_running
 
-    disk = [
     {% if instance.disks is undefined %}
-        {
-            volume_id = libvirt_volume.{{ instance.name }}_root.id
-        }
+    disk {
+        volume_id = libvirt_volume.{{ instance.name }}_root.id
+    }
     {% else %}
         {% for disk in instance.disks %}
             {%- if disk.file is defined %}
-        {
-            file = {{ disk.file }}
-        }
+    disk {
+        file = "{{ disk.file }}"
+    }
             {% elif disk.url is defined %}
-        {
-            url = {{ disk.url }}
-        }
+    disk {
+        url = "{{ disk.url }}"
+    }
             {% elif disk.volume_id is defined %}
-        {
-            volume_id = {{ disk.volume_id }}
-        }
+    disk {
+        volume_id = {{ disk.volume_id }}
+    }
             {% else %}
-        {
-            volume_id = libvirt_volume.{{ instance.name }}_{{ disk.name }}.id
-        }
+    disk {
+        volume_id = libvirt_volume.{{ instance.name }}_{{ disk.name }}.id
+    }
             {% endif %}
-            {% if not loop.last %},
-            {% endif %} 
         {% endfor %}
     {% endif %}
-    ]
-    
     {% if instance.networks is defined %}
-    {% for net in instance.networks %}
-    network_interface {
-        {% if net.network_name is defined %}
-        network_name = {{ net.network_name }}
-        {% endif %}
+        {% for net in instance.networks %}
+        network_interface {
+            {% if net.name is defined %}
+            network_name = "{{ net.name }}"
+            {% endif -%}
 
-        {% if net.network_id is defined %}
-        network_id = {{ net.network_id }}
-        {% endif %}
+            {% if net.network_id is defined %}
+            network_id = {{ net.network_id }}
+            {% endif -%}
 
-        {% if net.mac is defined %}
-        mac = {{ net.mac }}
-        {% endif %}
+            {% if net.mac is defined %}
+            mac = {{ net.mac }}
+            {% endif -%}
 
-        {% if net.addresses is defined %}
-        addresses = [
-            {% for net_addr in net.addresses %}
-            net_addr
-            {% if not loop.last %},
+            {% if net.addresses is defined %}
+            addresses = [
+                {% for net_addr in net.addresses %}
+                "{{ net_addr }}"
+                {% if not loop.last %},
+                {% endif %}
+                {% endfor %}
+            ]
+            {% endif -%}
+
+            {% if net.hostname is defined %}
+            hostname = {{ net.hostname }}
+            {% endif -%}
+
+            {% if net.wait_for_lease is defined and not net.wait_for_lease %}
+            wait_for_lease = false
             {% endif %}
-            {% endfor %}
-        ]
-        {% endif %}
-
-        {% if net.hostname is defined %}
-        hostname = {{ net.hostname }}
-        {% endif %}
-
-        {% if net.wait_for_lease is defined and not net.wait_for_lease %}
-        wait_for_lease = false
-        {% endif %}
-    }
-    {% endfor %}
-    {% endif %}
+        }
+        {% endfor %}
+    {% endif -%}
 
     {% if instance.cloudinit is defined %}
     cloudinit = {{ instance.cloudinit }}
-    {% endif %}
+    {% elif instance.raw is undefined %}
+    cloudinit = libvirt_cloudinit_disk.generic_cloudinit_iso.id
+    {% endif -%}
 
     {% if instance.autostart is defined and not instance.autostart %}
     autostart = false
-    {% endif %}
+    {% endif -%}
+
+    console {
+        type = "pty"
+        target_port = "0"
+        target_type = "serial"
+    }
 
     {% if instance.filesystem is defined %}
     filesystem {

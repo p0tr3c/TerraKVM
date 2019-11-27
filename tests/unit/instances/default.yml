@@ -1,0 +1,3 @@
+project_name: unit_tests_instances_default
+instances:
+  - name: test_01

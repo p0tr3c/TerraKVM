@@ -1,31 +1,14 @@
+- name: DEBUG
+  debug:
+    msg: "{{ terraform_dir }}"
+
 - name: Check if terraform exists
   stat:
-    path: "{{ terraform_dir }}/main.tf"
+    path: "{{ terraform_dir }}/terraform.tfstate"
   register: terraform_state
+
 - name: Destroy terraform deployment
   terraform:
     project_path: "{{ terraform_dir }}"
     state: absent
   when: terraform_state.stat.exists
-- name: Remove build image
-  file:
-    path: "{{ packer_dir }}/build/{{ vm_name }}"
-    state: absent
-  when: cleanup
-- name: Find all templated files
-  find:
-    paths:
-      - "{{ packer_dir }}"
-      - "{{ terraform_dir }}"
-    patterns: "*"
-    hidden: true
-    excludes: ".gitignore"
-    file_type: any
-  register: templated_files
-  when: cleanup
-- name: Remove templated files
-  file:
-    path: "{{ item.path }}"
-    state: absent
-  with_items: "{{ templated_files.files}}"
-  when: cleanup

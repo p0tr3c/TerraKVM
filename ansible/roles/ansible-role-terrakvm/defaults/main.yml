@@ -4,8 +4,9 @@ volumes: []
 instances: []
 
 default_instance_distro: ubuntu
-default_instance_arch: x86_64
-
+default_instance_arch: amd64
+default_libvirt_storage_pool: default
+default_terrakvm_passwd: $6$j8QBl0NwRNvRxWLD$YM1uDXlKtNTZJwF8akCIf6YCqE9gB2fBSgTdOyW7mrU3NGogZCK99dqzWgmCO/mh/iCBKSsXAXbCBw5aETb/S1
 #
 #
 #

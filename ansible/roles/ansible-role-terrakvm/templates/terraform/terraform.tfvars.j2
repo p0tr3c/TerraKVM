@@ -2,8 +2,6 @@
 ssh_username = "{{ ssh_username }}"
 ssh_public_key = "{{ ssh_public_key | b64decode }}"
 ssh_private_key_file = "./{{ project_name }}.pkey"
-volume_pool =  "{{ volume_pool | default('default') }}"
-cloudinit_iso = "{{ cloudinit_iso_name | default('cloudinit.iso') }}"
 
 {% if networks is defined %}
     {% for net in networks %} 
@@ -34,7 +32,7 @@ net_{{ net.name }}_dhcp = true
         {% endif %}
 
     {% endfor %}
-{% endif %}
+{% endif -%}
 
 {% if volumes is defined %}
   {% for vol in volumes %}
@@ -63,12 +61,11 @@ vol_{{ vol.name }}_base_volume_name = "{{ vol.base_volume_name }}"
 vol_{{ vol.name }}_base_volume_pool = "{{ vol.base_volume_pool }}"
     {% endif %}
   {% endfor %}
-{% endif %}
-
+{% endif -%}
 
 {% if instances is defined %}
     {% for instance in instances %}
-dom_{{ instance.name }} = {{ instance.name }}
+dom_{{ instance.name }} = "{{ instance.name }}"
         {% if instance.cpu is defined %}
 dom_{{ instance.name }}_cpu = {{ instance.cpu }}
         {% endif %} 

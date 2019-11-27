@@ -1,0 +1,8 @@
+project_name: unit_tests_instances_disk_size
+instances:
+  - name: test_01
+    distro: centos
+    disks:
+      - name: root
+      - name: data
+        size: 21474836480

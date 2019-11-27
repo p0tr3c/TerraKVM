@@ -1,26 +1,18 @@
 - name: Deploy VM(s)
   include_tasks: apply.yml
   when: action == "apply"
+  tags:
+    - always
 
 - name: Destroy VM(s)
   include_tasks: destroy.yml
   when: action == "destroy"
-
-- name: Build VM(s)
-  include_tasks: build.yml
-  loop: "{{ vms }}"
-  loop_control:
-    loop_var: build_item
-  when: action == "build" and (build_item.packer_build is defined and build_item.packer_build)
-
-- name: Development (Apply)
-  include_tasks: dev-apply.yml
-  when: action == "dev-apply"
   tags:
     - always
 
-- name: Development (Destroy)
-  include_tasks: dev-destroy.yml
-  when: action == "dev-destroy"
-  tags:
-    - always
+  #- name: Build VM(s)
+  #  include_tasks: build.yml
+  #  loop: "{{ vms }}"
+  #  loop_control:
+  #    loop_var: build_item
+  #  when: action == "build" and (build_item.packer_build is defined and build_item.packer_build)

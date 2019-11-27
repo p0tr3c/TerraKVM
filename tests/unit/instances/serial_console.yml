@@ -1,0 +1,7 @@
+project_name: unit_tests_instances_serial_console
+instances:
+  - name: test_01
+    distro: centos
+    console:
+      dest: /tmp/serial.log
+ 

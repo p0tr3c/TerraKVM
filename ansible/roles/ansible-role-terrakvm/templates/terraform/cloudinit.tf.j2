@@ -1,0 +1,29 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+data "template_file" "generic_user_data" {
+    template = <<EOF
+#cloud-config
+runcmd:
+  - [ sync ]
+users:
+  - name: $${ssh_user}
+    lock-passwd: false
+    passwd: {{ default_terrakvm_passwd }}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - $${ssh_public_key}
+EOF
+    vars = {
+        ssh_user = var.ssh_username
+        ssh_public_key = var.ssh_public_key
+    }
+}
+
+resource "libvirt_cloudinit_disk" "generic_cloudinit_iso" {
+    pool   = "{{ default_libvirt_storage_pool }}"
+    name       = "{{ project_name }}_terrakvm_cloudinit.iso"
+    user_data  = data.template_file.generic_user_data.rendered
+    meta_data  = <<EOF
+local-hostname: terrakvm
+EOF
+}

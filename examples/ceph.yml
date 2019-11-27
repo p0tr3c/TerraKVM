@@ -1,0 +1,56 @@
+project_name: ceph_sec_dev
+networks:
+  - name: ceph-public
+    bridge: ceph-public
+    address: 10.20.10.0/24
+    mode: none
+  - name: ceph-data
+    bridge: ceph-data
+    address: 10.20.20.0/24
+    mode: none
+  - name: ceph-admin
+    bridge: ceph-admin
+    address: 10.20.30.0/24
+    mode: none
+instances:
+  - name: ceph_node_01
+    disks:
+      - name: root
+        size: 21474836480
+      - name: ceph_1
+        size: 21474836480
+    networks:
+      - name: ceph-public
+        addresses:
+          - 10.20.10.10
+        wait_for_lease: false
+      - name: ceph-data
+        addresses:
+          - 10.20.20.10
+        wait_for_lease: false
+      - name: ceph-admin
+        addresses:
+          - 10.20.30.10
+        wait_for_lease: false
+  - name: ceph_node_02
+    disks:
+      - name: root
+        size: 21474836480
+      - name: ceph_1
+        size: 21474836480
+    networks:
+      - name: ceph-public
+        addresses:
+          - 10.20.10.20
+        wait_for_lease: false
+      - name: ceph-data
+        addresses:
+          - 10.20.20.20
+        wait_for_lease: false
+      - name: ceph-admin
+        addresses:
+          - 10.20.30.30
+        wait_for_lease: false
+
+
+ 

@@ -1,0 +1,8 @@
+project_name: unit_tests_instances_multiple_doms
+instances:
+  - name: test_01
+    distro: centos
+  
+  - name: test_02
+    distro: centos
+ 

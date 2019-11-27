@@ -1,0 +1,6 @@
+project_name: unit_tests_instances_multiple_disks
+instances:
+  - name: test_01
+    disks:
+      - name: root
+      - name: data

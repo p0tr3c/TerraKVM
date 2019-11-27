@@ -18,60 +18,50 @@
   tags:
     - always
 
-- name: Create SSH key
-  block:
-    - command: ssh-keygen -f "{{ terraform_dir }}/{{ project_name}}.pkey" -N ""
-      args:
-        creates: "{{ terraform_dir }}/{{ project_name }}.pkey"
-    - set_fact:
-          ssh_public_key: "{{ lookup('file',  terraform_dir + '/' + project_name  + '.pkey.pub') | b64encode }}"
-  when: ssh_public_key | length == 0
-
-- name: Create download dir
-  file:
-    path: "{{ download_cache_dir }}"
-    state: directory
-    mode: 0770
-
-- name: Download base cloud image
-  get_url:
-    url: "{{ cloud_images | json_query(download_filter) | json_query('[*].url') | join('') }}"
-    dest: "{{ download_cache_dir }}/{{ cloud_images | json_query(download_filter) | json_query('[*].iso_name') | join('') }}"
-    mode: 0660
-    checksum: "{{ cloud_images | json_query(download_filter) | json_query('[*].checksum') | join('') }}"
-  with_items: "{{ vms }}"
-  when: vms | length > 0 and (item.method is undefined or item.method == "cloud")
-  tags: download_cloud_image
-
-- name: Build images via packer
-  include_tasks: build.yml
-  loop: "{{ vms }}"
-  loop_control:
-    loop_var: build_item
-  when: vms | length > 0 and (build_item.method is defined and build_item.method == "packer")
-
-- name: Prepare ISO file
-  include_tasks: iso.yml 
-  loop: "{{ vms }}"
-  when: vms | length > 0 and (item.method is defined and item.method == "iso")
-
 - name: Template terraform instructions
   template:
     src: "terraform/{{ item.name }}.j2"
     dest: "{{ terraform_dir }}/{{ item.name }}"
   with_items:
-    - { name: "main.tf" }
-    - { name: "network.tf" }
+    - { name: "provider.tf" }
     - { name: "vars.tf" }
     - { name: "terraform.tfvars" }
-    - { name: "output.tf" }
-    - { name: "inventory.tpl"}
+  tags:
+    - template
+
+- name: Process Networks
+  template:
+    src: "terraform/{{ item.name }}.j2"
+    dest: "{{ terraform_dir }}/{{ item.name }}"
+  with_items:
+    - { name: "network.tf" }
+  when: networks | length > 0
+  tags:
+    - template
+
+- name: Process Volumes
+  template:
+    src: "terraform/{{ item.name }}.j2"
+    dest: "{{ terraform_dir }}/{{ item.name }}"
+  with_items:
+    - { name: "volume.tf" }
+  when: volumes | length > 0
+  tags:
+    - template
+
+- name: Process Instances
+  include_tasks: instances.yml
+  when: instances | length > 0
+  tags:
+    - always
 
 - name: Destroy current infrastructure
   terraform:
     project_path: "{{ terraform_dir }}"
     state: absent
   when: force_rebuild
+  tags:
+    - apply
 
 - name: Deploy via terraform
   terraform:
@@ -79,40 +69,28 @@
     state: present
     force_init: true
   register: terraform_output
+  tags:
+    - apply
 
 - name: Edit VM
   include_tasks:
     file: edit_xml.yml
-  loop: "{{ vms }}"
+  loop: "{{ instances }}"
   loop_control:
     loop_var: inner
   when:
     - inner.gdbstub is defined
     - inner.console is defined
-  
+  tags:
+    - apply
+
 - name: Create ssh config
   template:
     src: terraform/ssh_config
     dest: "{{ repo_dir }}/{{ project_name }}.config"
     mode: 0600
   with_dict: "{{ terraform_output.outputs }}"
-
-#- name: Add host for provisioning
-#  add_host:
-#    name: "{{ item.key }}"
-#    group: terrakvm
-#    ansible_ssh_user: "{{ item.value.value.ssh_username }}"
-#    ansible_ssh_host: "{{ item.value.value.public_ip }}"
-#    ansible_ssh_private_key_file: "{{ terraform_dir }}/{{ project_name}}.pkey"
-#  with_dict: "{{ terraform_output.outputs }}"
-#
-#- name: Include per-host provisioning
-#  include_tasks:
-#    file: "{{ ansible_dir }}/{{ delegation.provisioning_tasks }}"
-#  loop: "{{ vms }}"
-#  loop_control:
-#    loop_var: delegation
-#  when: delegation.provisioning_tasks is defined
+  when: instances | length > 0
 
 - name: Connection information
   debug:
@@ -121,3 +99,7 @@
       "Connect: ssh -i {{ terraform_dir }}/{{ project_name }}.pkey {{ item.value.value.ssh_username}}@{{ item.value.value.public_ip }}"
   ]
   with_dict: "{{ terraform_output.outputs }}"
+  when: instances | length > 0
+
+
+

@@ -1,0 +1,31 @@
+project_name: unit_tests_instances_multiple_nets
+networks:
+  - name: ceph-public
+    bridge: ceph-public
+    address: 10.20.10.0/24
+    mode: none
+  - name: ceph-data
+    bridge: ceph-data
+    address: 10.20.20.0/24
+    mode: none
+  - name: ceph-admin
+    bridge: ceph-admin
+    address: 10.20.30.0/24
+    mode: none
+instances:
+  - name: test_01
+    networks:
+      - name: ceph-public
+        addresses:
+          - 10.20.10.10
+        wait_for_lease: false
+      - name: ceph-data
+        addresses:
+          - 10.20.20.10
+        wait_for_lease: false
+      - name: ceph-admin
+        addresses:
+          - 10.20.30.10
+        wait_for_lease: false
+
+ 

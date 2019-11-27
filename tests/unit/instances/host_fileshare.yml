@@ -1,0 +1,9 @@
+project_name: unit_tests_instances_host_fileshare
+instances:
+  - name: test_01
+    distro: centos
+    filesystem:
+      source: /tmp
+      target: tmp
+      readonly: true
+ 

@@ -1,7 +1,4 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
-variable "disk_id" {}
-variable "volume_pool" {}
-variable "cloudinit_iso" {}
 variable "ssh_username" {}
 variable "ssh_public_key" {}
 variable "ssh_private_key_file" {}
@@ -82,7 +79,9 @@ variable "vol_{{ vol.name }}_base_volume_pool" {}
 {% if instances is defined %}
     {% for instance in instances %}
 variable "dom_{{ instance.name }}" {}
-variable "dom_{{ instance.name }}_cpu" {}
+variable "dom_{{ instance.name }}_cpu" {
+    default="host-passthrough"
+}
 variable "dom_{{ instance.name }}_vpcu" {
     default=2
 }

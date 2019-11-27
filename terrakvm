@@ -47,30 +47,13 @@ function pre_assert(){
   fi
 }
 
-function do_dev_apply(){
-  pre_assert $@
-  if [ -z "$PROJECT_FILENAME" ]; then
-      docker-compose run terrakvm ansible-playbook playbooks/dev-apply.yml "${extra_args[@]}"
-  else
-      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev-apply.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
-  fi
-}
 
-function do_dev_destroy(){
+function do_template(){
   pre_assert $@
   if [ -z "$PROJECT_FILENAME" ]; then
-      docker-compose run terrakvm ansible-playbook playbooks/dev-destroy.yml "${extra_args[@]}"
+      docker-compose run terrakvm ansible-playbook playbooks/apply.yml --tags template "${extra_args[@]}"
   else
-      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev-destroy.yml -e "@$PROJECT_FILENAME" "${extra_args[@]}"
-  fi
-}
-
-function do_dev_template(){
-  pre_assert $@
-  if [ -z "$PROJECT_FILENAME" ]; then
-      docker-compose run terrakvm ansible-playbook playbooks/dev-apply.yml --tags template "${extra_args[@]}"
-  else
-      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/dev-apply.yml -e "@$PROJECT_FILENAME" --tags template "${extra_args[@]}"
+      docker-compose run -v "$PROJECT_ABS_PATH":/TerraKVM/ansible/"$PROJECT_FILENAME" terrakvm ansible-playbook playbooks/apply.yml -e "@$PROJECT_FILENAME" --tags template "${extra_args[@]}"
   fi
 }
 
@@ -136,12 +119,10 @@ function main(){
         echo "Usage:"
         echo "    $0 -h                      Display this help message."
         echo "    $0 apply <project>         Deploy <project>."
+        echo "    $0 template <project>      Template terraform config <project>."
         echo "    $0 destroy <project>       Destroy <project>."
         echo "    $0 build <project>         Build <project>."
         echo "    $0 init                    Initialize TerraKVM."
-        echo "    $0 dev-apply               Run development playbooks."
-        echo "    $0 dev-destroy             Run development playbooks."
-        echo "    $0 dev-template            Run development playbooks."
         exit 0
         ;;
      \? )
@@ -157,14 +138,8 @@ function main(){
     preconfig)
       do_preconfig $@
       ;;
-    dev-apply)
-      do_dev_apply $@
-      ;;
-    dev-destroy)
-      do_dev_destroy $@
-      ;;
-    dev-template)
-      do_dev_template $@
+    template)
+      do_template $@
       ;;
     apply)
       do_apply $@

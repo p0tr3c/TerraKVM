@@ -9,7 +9,9 @@ template_dir: "{{ (repo_dir + '/templates') | realpath }}"
 packer_cache_dir: "{{ download_cache_dir }}"
 
 terraform_iso_filter: "[?distro=='{{ distro }}' && arch=='{{ arch }}'].iso_name"
-download_filter: "[?distro=='{{ item.distro }}' && arch=='{{ item.arch }}']"
+default_distro: ubuntu
+default_arch: amd64
+download_filter: "[?distro=='{{ item.distro | default(default_distro) }}' && arch=='{{ item.arch | default(default_arch) }}']"
 
 iso_images:
   - url: http://mirrors.edge.kernel.org/archlinux/iso/latest/archlinux-2019.08.01-x86_64.iso

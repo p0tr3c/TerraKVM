@@ -1,7 +1,0 @@
-- name: Template terraform instructions
-  template:
-    src: "terraform/{{ item.name }}.j2"
-    dest: "{{ terraform_dir }}/{{ item.name }}"
-  with_items:
-    - { name: "network.tf" }
-
