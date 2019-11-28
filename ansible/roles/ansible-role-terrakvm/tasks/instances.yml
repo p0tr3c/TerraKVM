@@ -6,6 +6,8 @@
     - set_fact:
           ssh_public_key: "{{ lookup('file',  terraform_dir + '/' + project_name  + '.pkey.pub') | b64encode }}"
   when: ssh_public_key | length == 0
+  tags:
+    - always
 
 - name: Template terraform instructions
   template:
@@ -14,6 +16,7 @@
   with_items:
     - { name: "instance.tf" }
     - { name: "cloudinit.tf" }
+    - { name: "output.tf" }
   tags:
     - template
 

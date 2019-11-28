@@ -18,16 +18,6 @@
   tags:
     - always
 
-- name: Template terraform instructions
-  template:
-    src: "terraform/{{ item.name }}.j2"
-    dest: "{{ terraform_dir }}/{{ item.name }}"
-  with_items:
-    - { name: "provider.tf" }
-    - { name: "vars.tf" }
-    - { name: "terraform.tfvars" }
-  tags:
-    - template
 
 - name: Process Networks
   template:
@@ -54,6 +44,18 @@
   when: instances | length > 0
   tags:
     - always
+
+- name: Template terraform instructions
+  template:
+    src: "terraform/{{ item.name }}.j2"
+    dest: "{{ terraform_dir }}/{{ item.name }}"
+  with_items:
+    - { name: "provider.tf" }
+    - { name: "vars.tf" }
+    - { name: "terraform.tfvars" }
+  tags:
+    - template
+
 
 - name: Destroy current infrastructure
   terraform:

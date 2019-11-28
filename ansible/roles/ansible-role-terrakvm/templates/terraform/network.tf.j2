@@ -29,6 +29,12 @@ resource "libvirt_network" "{{ net.name }}" {
       enabled = {{ net.dhcp|lower }}
     }
     {% endif %}
+
+    {%- if net.dns is defined and net.dns %}
+    dns {
+        enabled = true
+    }
+    {% endif %}
 }
 
   {% endfor %}

@@ -8,3 +8,5 @@
         name: ansible-role-terrakvm
       vars:
         action: apply
+      tags:
+        - always

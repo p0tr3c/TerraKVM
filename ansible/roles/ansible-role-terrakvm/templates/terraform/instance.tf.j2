@@ -128,6 +128,8 @@ resource "libvirt_domain" "{{ instance.name }}" {
 
             {% if net.wait_for_lease is defined and not net.wait_for_lease %}
             wait_for_lease = false
+            {% else %}
+            wait_for_lease = true
             {% endif %}
         }
         {% endfor %}
