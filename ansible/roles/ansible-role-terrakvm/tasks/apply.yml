@@ -82,7 +82,7 @@
     loop_var: inner
   when:
     - inner.gdbstub is defined
-    - inner.console is defined
+      #- inner.console is defined
   tags:
     - apply
 

@@ -11,40 +11,34 @@ instances:
 # 8. cloudinit: optional
 # 9. autostart: optional
 # 10. filesystem: optional
-# 11. firmware: optional
-# 12. nvram: optional
 #
 # 13. distro: optional
 # 14. arch: optional
 # TODO:
 # kernel: optional --> not implemented
 # cmdline: optional    --> not implemented
+# firmware: optional  --> not implemented
+# nvram: optional     --> not implemented
+
   - name: test_01
 
   - name: test_02
     distro: ubuntu
-    cpu: host-passthrough
 
   - name: test_03
     distro: ubuntu
     arch: x86
-    cpu: host-passthrough
-    vcpu: 2
 
   - name: test_04
     distro: ubuntu
     arch: x86
     cpu: host-passthrough
-    vcpu: 2
-    memory: 1024
 
   - name: test_05
     distro: ubuntu
     arch: x86
     cpu: host-passthrough
     vcpu: 2
-    memory: 1024
-    running: false
 
   - name: test_06
     distro: ubuntu
@@ -52,8 +46,111 @@ instances:
     cpu: host-passthrough
     vcpu: 2
     memory: 1024
+
+  - name: test_07
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+
+  - name: test_08
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
     running: false
-    
+
+  - name: test_09
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+    disks:
+      - name: root
+
+  - name: test_10
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+    disks:
+      - name: root
+      - name: data
+
+  - name: test_11
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+    disks:
+      - name: root
+      - name: data
+    networks:
+      - name: default
+
+  - name: test_12
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+    disks:
+      - name: root
+      - name: data
+    networks:
+      - name: default
+    filesystem:
+      source: /tmp
+      target: tmp
+
+  - name: test_13
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+    disks:
+      - name: root
+      - name: data
+    networks:
+      - name: default
+    filesystem:
+      source: /tmp
+      target: tmp
+      readonly: true
+
+  - name: test_14
+    distro: ubuntu
+    arch: x86
+    cpu: host-passthrough
+    vcpu: 2
+    memory: 1024
+    running: false
+    autostart: true
+    disks:
+      - name: root
+      - name: data
+    networks:
+      - name: default
+    filesystem:
+      source: /tmp
+      target: tmp
+      readonly: true
+
+
+
+
+   
     
  
     
