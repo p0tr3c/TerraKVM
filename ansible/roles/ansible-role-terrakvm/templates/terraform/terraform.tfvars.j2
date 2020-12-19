@@ -78,9 +78,10 @@ dom_{{ instance.name }}_memory = {{ instance.memory }}
         {% if instance.disks is defined %}
             {% for disk in instance.disks %}
                 {%- if disk.file is defined %}
-{{ instance.name }}_{{ disk.name }}_source = {{ disk.file }}
+{{ instance.name }}_{{ disk.name }}_source = "{{ disk.file }}"
                 {% endif %}
             {% endfor %}
         {% endif %}
+
     {% endfor %}
 {% endif %}

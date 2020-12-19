@@ -1,5 +1,9 @@
 FROM golang:alpine
 
+ARG GOPATH="/go"
+
+ENV GOPATH=$GOPATH
+
 # Update APK
 RUN apk update && apk upgrade
 

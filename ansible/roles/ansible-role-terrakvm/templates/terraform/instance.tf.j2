@@ -15,7 +15,7 @@
         {% endif -%}
 
 {% set current_base_os = current_distro ~ "_" ~ current_arch %}
-        {% if not current_base_os in base_distro_list %}
+        {% if not current_base_os in base_distro_list and instance.iso_build is undefined %}
 resource "libvirt_volume" "{{ current_base_os }}_os_base" {    
 {% set terraform_loop_iso_filter = "[?distro=='"+ current_distro +"' && arch=='" + current_arch +"'].iso_name" %}
     name = "{{ project_name }}_{{ current_base_os }}_os_base"
@@ -32,6 +32,7 @@ resource "libvirt_volume" "{{ instance.name }}_root" {
 }
         {% else %}
             {% for disk in instance.disks %}
+                {% if disk.file is undefined %}
 resource "libvirt_volume" "{{ instance.name }}_{{ disk.name }}" {
     name = "{{ project_name }}_dom_vol_{{ instance.name }}_{{ disk.name }}"
     {% if disk.pool is defined %}
@@ -60,6 +61,7 @@ resource "libvirt_volume" "{{ instance.name }}_{{ disk.name }}" {
     base_volume_pool = "{{ disk.base_volume_pool }}"
     {% endif %}
 }
+                {% endif %}
             {% endfor %}
         {% endif %}
 
@@ -145,6 +147,14 @@ resource "libvirt_domain" "{{ instance.name }}" {
     autostart = false
     {% endif -%}
 
+    boot_device {
+    {% if instance.iso_build is defined %}
+        dev = ["hd", "cdrom", "network"]
+    {% else %}
+        dev = ["hd", "network"]
+    {% endif %}
+    }
+
     console {
         type = "pty"
         target_port = "0"
@@ -153,8 +163,8 @@ resource "libvirt_domain" "{{ instance.name }}" {
 
     {% if instance.filesystem is defined %}
     filesystem {
-        source = {{ instance.filesystem.source }}
-        target = {{ instance.filesystem.target }}
+        source = "{{ instance.filesystem.source }}"
+        target = "{{ instance.filesystem.target }}"
         {% if instance.filesystem.readonly is defined and instance.filesystem.readonly %}
         readonly = true
         {% else %}

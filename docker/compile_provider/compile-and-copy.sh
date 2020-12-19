@@ -1,9 +1,9 @@
 #!/bin/sh
 
-cd src/github.com/dmacvicar/terraform-provider-libvirt/
+cd $GOPATH/src/github.com/dmacvicar/terraform-provider-libvirt/
 
-make
+export GO111MODULE=on
+export GOFLAGS=-mod=vendor
+make install
 
-make build
-
-cp terraform-provider-libvirt /output/
+cp $GOPATH/bin/terraform-provider-libvirt /output/

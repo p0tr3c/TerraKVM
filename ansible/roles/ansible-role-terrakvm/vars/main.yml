@@ -28,6 +28,11 @@ iso_images:
     virt_source: /var/lib/libvirt/images/alpine-virt-3.9.0-x86_64.iso
 
 cloud_images:
+  - url: https://cloud-images.ubuntu.com/focal/20201105/focal-server-cloudimg-amd64.img 
+    iso_name: focal-server-cloudimg-amd64.img
+    checksum: sha256:f1222c77557973c881063175e33003ea4ea8046d046dfbecf778323b0d0d7dd2
+    distro: ubuntu-focal
+    arch: amd64
   - url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1907.qcow2
     iso_name: CentOS-7-x86_64-GenericCloud-1907.qcow2
     checksum: sha256:520d01c2f2e1ed24cb2f15a4325aa30773930a2961b5484a68cf11b4a415c512
@@ -57,6 +62,11 @@ cloud_images:
     iso_name: Fedora-Cloud-Base-28-1.1.x86_64.qcow2
     checksum: sha256:d987209719fadaf81b8bff85c5d3590a1d3dac6357e4838fde8357086c49b5b4
     distro: fedora28
+    arch: amd64
+  - url: https://cloud-images.ubuntu.com/releases/bionic/release-20201031/ubuntu-18.04-server-cloudimg-amd64.img
+    iso_name: ubuntu-18.04-server-cloudimg-amd64.img
+    checksum: sha256:5f7fea2bfd9f0471eb70b47fdabe9c60dc71440172588f0aa68a1d29a636b11e
+    distro: ubuntu-bionic
     arch: amd64
   - url: https://cloud-images.ubuntu.com/releases/18.04/release-20190604/ubuntu-18.04-server-cloudimg-amd64.img
     iso_name: bionic-server-cloudimg-amd64.img
